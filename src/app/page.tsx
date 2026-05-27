@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import BranchSelect from '@/components/BranchSelect';
+import DatePicker from '@/components/DatePicker';
 import { submitSurvey } from '@/app/actions';
 import { 
   Building2, 
@@ -261,18 +262,14 @@ export default function SurveyPage() {
                     <div className="form-group">
                       <label className="form-label">ช่วงวันที่เข้ารับการฝึกอบรม <span>*</span></label>
                       <div className="date-picker-group">
-                        <input
-                          type="date"
-                          className="form-input"
+                        <DatePicker
                           value={formData.branch1TrainingStart}
-                          onChange={(e) => setFormData(prev => ({ ...prev, branch1TrainingStart: e.target.value }))}
+                          onChange={(val) => setFormData(prev => ({ ...prev, branch1TrainingStart: val }))}
                         />
                         <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>ถึง</span>
-                        <input
-                          type="date"
-                          className="form-input"
+                        <DatePicker
                           value={formData.branch1TrainingEnd}
-                          onChange={(e) => setFormData(prev => ({ ...prev, branch1TrainingEnd: e.target.value }))}
+                          onChange={(val) => setFormData(prev => ({ ...prev, branch1TrainingEnd: val }))}
                         />
                       </div>
                       {(errors.branch1TrainingStart || errors.branch1TrainingEnd) && (
@@ -314,18 +311,14 @@ export default function SurveyPage() {
                     <div className="form-group">
                       <label className="form-label">ช่วงวันที่เข้ารับการฝึกอบรม <span>*</span></label>
                       <div className="date-picker-group">
-                        <input
-                          type="date"
-                          className="form-input"
+                        <DatePicker
                           value={formData.branch2TrainingStart}
-                          onChange={(e) => setFormData(prev => ({ ...prev, branch2TrainingStart: e.target.value }))}
+                          onChange={(val) => setFormData(prev => ({ ...prev, branch2TrainingStart: val }))}
                         />
                         <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>ถึง</span>
-                        <input
-                          type="date"
-                          className="form-input"
+                        <DatePicker
                           value={formData.branch2TrainingEnd}
-                          onChange={(e) => setFormData(prev => ({ ...prev, branch2TrainingEnd: e.target.value }))}
+                          onChange={(val) => setFormData(prev => ({ ...prev, branch2TrainingEnd: val }))}
                         />
                       </div>
                       {(errors.branch2TrainingStart || errors.branch2TrainingEnd) && (
