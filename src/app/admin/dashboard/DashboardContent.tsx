@@ -18,7 +18,9 @@ import {
   X,
   Star,
   CheckCircle,
-  HelpCircle
+  HelpCircle,
+  Award,
+  AlertTriangle
 } from 'lucide-react';
 
 interface ResponseData {
@@ -71,6 +73,15 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Tabs and branch view states
+  const [activeTab, setActiveTab] = useState<'overview' | 'branches'>('overview');
+  const [branchSearchTerm, setBranchSearchTerm] = useState('');
+  const [branchSortKey, setBranchSortKey] = useState<'name' | 'count' | 'average'>('average');
+  const [branchSortOrder, setBranchSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [branchCurrentPage, setBranchCurrentPage] = useState(1);
+  const branchItemsPerPage = 10;
+
 
   // Filter logic
   const filteredResponses = useMemo(() => {
@@ -137,6 +148,204 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
       avgBranch2: parseFloat((sumBranch2 / total).toFixed(2))
     };
   }, [filteredResponses]);
+
+  // Branch-by-branch aggregated stats
+  const branchPerformance = useMemo(() => {
+    const branchesMap: Record<string, {
+      branchName: string;
+      responseCount: number;
+      q5Sum: number;
+      q6Sum: number;
+      q7Sum: number;
+      q8Sum: number;
+      q9Sum: number;
+      q10Sum: number;
+      q11Sum: number;
+      totalScoreSum: number;
+    }> = {};
+
+    filteredResponses.forEach(res => {
+      // Process Branch 1
+      if (res.branch1) {
+        const b1 = res.branch1.trim();
+        if (b1) {
+          if (!branchesMap[b1]) {
+            branchesMap[b1] = {
+              branchName: b1,
+              responseCount: 0,
+              q5Sum: 0,
+              q6Sum: 0,
+              q7Sum: 0,
+              q8Sum: 0,
+              q9Sum: 0,
+              q10Sum: 0,
+              q11Sum: 0,
+              totalScoreSum: 0
+            };
+          }
+          const bData = branchesMap[b1];
+          bData.responseCount += 1;
+          bData.q5Sum += res.q5_clarity_branch1;
+          bData.q6Sum += res.q6_volume_branch1;
+          bData.q7Sum += res.q7_readiness_branch1;
+          bData.q8Sum += res.q8_trainer_knowledge_branch1;
+          bData.q9Sum += res.q9_safety_hygiene_branch1;
+          bData.q10Sum += res.q10_trainer_care_branch1;
+          bData.q11Sum += res.q11_atmosphere_branch1;
+          bData.totalScoreSum += (
+            res.q5_clarity_branch1 +
+            res.q6_volume_branch1 +
+            res.q7_readiness_branch1 +
+            res.q8_trainer_knowledge_branch1 +
+            res.q9_safety_hygiene_branch1 +
+            res.q10_trainer_care_branch1 +
+            res.q11_atmosphere_branch1
+          ) / 7;
+        }
+      }
+
+      // Process Branch 2
+      if (res.branch2) {
+        const b2 = res.branch2.trim();
+        if (b2) {
+          if (!branchesMap[b2]) {
+            branchesMap[b2] = {
+              branchName: b2,
+              responseCount: 0,
+              q5Sum: 0,
+              q6Sum: 0,
+              q7Sum: 0,
+              q8Sum: 0,
+              q9Sum: 0,
+              q10Sum: 0,
+              q11Sum: 0,
+              totalScoreSum: 0
+            };
+          }
+          const bData = branchesMap[b2];
+          bData.responseCount += 1;
+          bData.q5Sum += res.q5_clarity_branch2;
+          bData.q6Sum += res.q6_volume_branch2;
+          bData.q7Sum += res.q7_readiness_branch2;
+          bData.q8Sum += res.q8_trainer_knowledge_branch2;
+          bData.q9Sum += res.q9_safety_hygiene_branch2;
+          bData.q10Sum += res.q10_trainer_care_branch2;
+          bData.q11Sum += res.q11_atmosphere_branch2;
+          bData.totalScoreSum += (
+            res.q5_clarity_branch2 +
+            res.q6_volume_branch2 +
+            res.q7_readiness_branch2 +
+            res.q8_trainer_knowledge_branch2 +
+            res.q9_safety_hygiene_branch2 +
+            res.q10_trainer_care_branch2 +
+            res.q11_atmosphere_branch2
+          ) / 7;
+        }
+      }
+    });
+
+    // Convert map to array and compute averages
+    let list = Object.values(branchesMap).map(b => {
+      const count = b.responseCount;
+      return {
+        branchName: b.branchName,
+        responseCount: count,
+        avgQ5: parseFloat((b.q5Sum / count).toFixed(2)),
+        avgQ6: parseFloat((b.q6Sum / count).toFixed(2)),
+        avgQ7: parseFloat((b.q7Sum / count).toFixed(2)),
+        avgQ8: parseFloat((b.q8Sum / count).toFixed(2)),
+        avgQ9: parseFloat((b.q9Sum / count).toFixed(2)),
+        avgQ10: parseFloat((b.q10Sum / count).toFixed(2)),
+        avgQ11: parseFloat((b.q11Sum / count).toFixed(2)),
+        avgTotal: parseFloat((b.totalScoreSum / count).toFixed(2))
+      };
+    });
+
+    // Apply specific branch search filter (if any)
+    if (branchSearchTerm) {
+      list = list.filter(b => b.branchName.toLowerCase().includes(branchSearchTerm.toLowerCase()));
+    }
+
+    // Apply sorting
+    list.sort((a, b) => {
+      let comparison = 0;
+      if (branchSortKey === 'name') {
+        comparison = a.branchName.localeCompare(b.branchName);
+      } else if (branchSortKey === 'count') {
+        comparison = a.responseCount - b.responseCount;
+      } else if (branchSortKey === 'average') {
+        comparison = a.avgTotal - b.avgTotal;
+      }
+
+      return branchSortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    return list;
+  }, [filteredResponses, branchSearchTerm, branchSortKey, branchSortOrder]);
+
+  // Paginated branch performance
+  const paginatedBranchPerformance = useMemo(() => {
+    const startIndex = (branchCurrentPage - 1) * branchItemsPerPage;
+    return branchPerformance.slice(startIndex, startIndex + branchItemsPerPage);
+  }, [branchPerformance, branchCurrentPage]);
+
+  const totalBranchPages = Math.ceil(branchPerformance.length / branchItemsPerPage);
+
+
+  const branchSummaryStats = useMemo(() => {
+    const allDistinctBranches = new Set<string>();
+    const branchScores: Record<string, { total: number; count: number }> = {};
+
+    filteredResponses.forEach(res => {
+      if (res.branch1 && res.branch1.trim()) {
+        const b = res.branch1.trim();
+        allDistinctBranches.add(b);
+        if (!branchScores[b]) branchScores[b] = { total: 0, count: 0 };
+        branchScores[b].total += (
+          res.q5_clarity_branch1 +
+          res.q6_volume_branch1 +
+          res.q7_readiness_branch1 +
+          res.q8_trainer_knowledge_branch1 +
+          res.q9_safety_hygiene_branch1 +
+          res.q10_trainer_care_branch1 +
+          res.q11_atmosphere_branch1
+        ) / 7;
+        branchScores[b].count += 1;
+      }
+      if (res.branch2 && res.branch2.trim()) {
+        const b = res.branch2.trim();
+        allDistinctBranches.add(b);
+        if (!branchScores[b]) branchScores[b] = { total: 0, count: 0 };
+        branchScores[b].total += (
+          res.q5_clarity_branch2 +
+          res.q6_volume_branch2 +
+          res.q7_readiness_branch2 +
+          res.q8_trainer_knowledge_branch2 +
+          res.q9_safety_hygiene_branch2 +
+          res.q10_trainer_care_branch2 +
+          res.q11_atmosphere_branch2
+        ) / 7;
+        branchScores[b].count += 1;
+      }
+    });
+
+    const branchesList = Object.entries(branchScores).map(([name, data]) => ({
+      name,
+      average: parseFloat((data.total / data.count).toFixed(2)),
+      count: data.count
+    }));
+
+    const sortedByScore = [...branchesList].sort((a, b) => b.average - a.average);
+
+    return {
+      totalDistinctBranches: allDistinctBranches.size,
+      highestRated: sortedByScore[0] || null,
+      lowestRated: sortedByScore[sortedByScore.length - 1] || null,
+      topBranches: sortedByScore.slice(0, 5),
+      bottomBranches: [...sortedByScore].reverse().slice(0, 5)
+    };
+  }, [filteredResponses]);
+
 
   // Distribution chart data
   const chartsData = useMemo(() => {
@@ -235,6 +444,39 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
     XLSX.writeFile(wb, `survey_responses_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
+  const handleExportBranchExcel = () => {
+    const headers = [
+      'ชื่อสาขา',
+      'จำนวนการประเมิน (ครั้ง)',
+      'คะแนนเฉลี่ยรวม',
+      '5. การสอน (ขั้นตอนชัดเจน)',
+      '6. ปริมาณเนื้อหา (เหมาะสมกับเวลา)',
+      '7. อุปกรณ์การสอน (พร้อมใช้งาน)',
+      '8. พี่เลี้ยง/ผู้สอน (ความรู้ความเชี่ยวชาญ)',
+      '9. พี่เลี้ยง/ผู้สอน (ความปลอดภัย/Food Safety)',
+      '10. พี่เลี้ยง/ผู้สอน (ใส่ใจเป็นกันเอง)',
+      '11. บรรยากาศสาขา (ต้อนรับสนับสนุน)'
+    ];
+
+    const dataRows = branchPerformance.map(b => [
+      b.branchName,
+      b.responseCount,
+      b.avgTotal,
+      b.avgQ5,
+      b.avgQ6,
+      b.avgQ7,
+      b.avgQ8,
+      b.avgQ9,
+      b.avgQ10,
+      b.avgQ11
+    ]);
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
+    XLSX.utils.book_append_sheet(wb, ws, "ประสิทธิภาพรายสาขา");
+    XLSX.writeFile(wb, `branch_performance_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   const handleLogout = async () => {
     await adminLogout();
     window.location.href = '/admin/login';
@@ -259,6 +501,13 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
     return 'badge-secondary'; // Needs improvement
   };
 
+  const getBranchBadgeClass = (score: number) => {
+    if (score >= 3.5) return 'badge-green';
+    if (score >= 2.5) return 'badge-orange';
+    return 'badge-red';
+  };
+
+
   return (
     <div className="admin-shell">
       <div className="theme-header-bar" />
@@ -280,7 +529,25 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
       {/* Main Content */}
       <main className="admin-main">
         
-        {/* KPI Statistics */}
+        {/* Navigation Tabs */}
+        <div className="admin-tabs">
+          <button 
+            onClick={() => { setActiveTab('overview'); }} 
+            className={`admin-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
+          >
+            ภาพรวมและผู้ตอบแบบประเมิน ({stats.total})
+          </button>
+          <button 
+            onClick={() => { setActiveTab('branches'); }} 
+            className={`admin-tab-btn ${activeTab === 'branches' ? 'active' : ''}`}
+          >
+            ประสิทธิภาพแยกรายสาขา ({branchSummaryStats.totalDistinctBranches})
+          </button>
+        </div>
+
+        {activeTab === 'overview' ? (
+          <>
+
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-icon red">
@@ -332,7 +599,6 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
         {/* Charts Section */}
         {stats.total > 0 && (
           <div className="dashboard-row">
-            
             {/* Chart 1: SVG Bar Chart for Score Distribution */}
             <div className="dashboard-card">
               <div className="dashboard-card-title">
@@ -340,62 +606,112 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>อิงจากจำนวนการประเมินย่อย ({stats.total * 3} รายการ)</span>
               </div>
               
-              <div className="svg-chart-container" style={{ height: '220px' }}>
-                <svg width="100%" height="200" viewBox="0 0 400 200" preserveAspectRatio="none">
+              <div style={{ height: '220px', padding: '10px 10px 0 10px' }}>
+                <div style={{ 
+                  height: '160px', 
+                  display: 'flex', 
+                  alignItems: 'flex-end', 
+                  justifyContent: 'space-around', 
+                  position: 'relative',
+                  borderBottom: '2px solid #94A3B8',
+                  margin: '20px 10px 30px 40px',
+                }}>
                   {/* Grid Lines */}
-                  {[0, 25, 50, 75, 100].map((percent, idx) => {
-                    const y = 20 + (140 * (100 - percent)) / 100;
+                  {[0, 25, 50, 75, 100].map((percent) => {
                     return (
-                      <g key={idx}>
-                        <line x1="40" y1={y} x2="380" y2={y} stroke="#E2E8F0" strokeWidth="1" strokeDasharray="3,3" />
-                        <text x="30" y={y + 4} className="bar-chart-y-axis" textAnchor="end">{percent}%</text>
-                      </g>
+                      <div 
+                        key={percent} 
+                        style={{ 
+                          position: 'absolute', 
+                          left: '0', 
+                          right: '0', 
+                          bottom: `${percent}%`, 
+                          borderBottom: '1px dashed #E2E8F0', 
+                          zIndex: 0 
+                        }}
+                      >
+                        <span style={{ 
+                          fontSize: '10px', 
+                          color: 'var(--text-muted)', 
+                          position: 'absolute', 
+                          left: '-35px', 
+                          top: '-6px',
+                          textAlign: 'right',
+                          width: '30px'
+                        }}>
+                          {percent}%
+                        </span>
+                      </div>
                     );
                   })}
 
                   {/* Bars representing scores 1-4 */}
-                  {[1, 2, 3, 4].map((score, index) => {
+                  {[1, 2, 3, 4].map((score) => {
                     const count = chartsData.scores[score as 4|3|2|1] || 0;
                     const totalRatings = stats.total * 3;
                     const percentage = totalRatings > 0 ? (count / totalRatings) * 100 : 0;
-                    
-                    const barWidth = 40;
-                    const spacing = 45;
-                    const x = 70 + index * (barWidth + spacing);
-                    const barHeight = (140 * percentage) / 100;
-                    const y = 160 - barHeight;
 
                     // Red accent for high, yellow for moderate, light for low
                     let fillColor = 'var(--border-color)';
                     if (score === 4) fillColor = 'var(--primary-red)';
                     else if (score === 3) fillColor = 'var(--primary-yellow)';
-                    else if (score === 2) fillStyle: fillColor = '#F472B6'; // Pink
+                    else if (score === 2) fillColor = '#F472B6'; // Pink
                     else if (score === 1) fillColor = '#FDA4AF'; // Light rose
 
                     return (
-                      <g key={score}>
-                        {/* Bar */}
-                        <rect 
-                          x={x} 
-                          y={y} 
-                          width={barWidth} 
-                          height={Math.max(barHeight, 2)} 
-                          fill={fillColor} 
-                          rx="4" 
-                        />
+                      <div 
+                        key={score} 
+                        style={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          alignItems: 'center', 
+                          position: 'relative', 
+                          zIndex: 1, 
+                          width: '60px',
+                          height: '100%',
+                          justifyContent: 'flex-end'
+                        }}
+                      >
                         {/* Value Text */}
-                        <text x={x + barWidth / 2} y={y - 6} textAnchor="middle" fontSize="10" fontWeight="600" fill="var(--text-primary)">
+                        <span style={{ 
+                          fontSize: '11px', 
+                          fontWeight: '600', 
+                          color: 'var(--text-primary)', 
+                          marginBottom: '6px',
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap'
+                        }}>
                           {count} ({percentage.toFixed(0)}%)
-                        </text>
+                        </span>
+
+                        {/* Bar block */}
+                        {count > 0 && (
+                          <div 
+                            style={{ 
+                              width: '36px', 
+                              height: `${percentage}%`, 
+                              backgroundColor: fillColor, 
+                              borderRadius: '4px 4px 0 0',
+                              transition: 'height 0.3s ease'
+                            }} 
+                          />
+                        )}
+
                         {/* X Axis Label */}
-                        <text x={x + barWidth / 2} y="180" textAnchor="middle" fontSize="11" fontWeight="500" fill="var(--text-primary)">
+                        <span style={{ 
+                          position: 'absolute', 
+                          bottom: '-22px', 
+                          fontSize: '11px', 
+                          fontWeight: '500', 
+                          color: 'var(--text-primary)',
+                          whiteSpace: 'nowrap'
+                        }}>
                           คะแนน {score}
-                        </text>
-                      </g>
+                        </span>
+                      </div>
                     );
                   })}
-                  <line x1="40" y1="160" x2="380" y2="160" stroke="#94A3B8" strokeWidth="2" />
-                </svg>
+                </div>
               </div>
 
               <div className="chart-legend">
@@ -417,7 +733,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                 </div>
               </div>
             </div>
-
+            
             {/* Chart 2: SVG Stacked Bar suitability */}
             <div className="dashboard-card">
               <div className="dashboard-card-title">ความเหมาะสมของโครงการ (5 วันใน 2 สาขา)</div>
@@ -665,7 +981,269 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
 
         </div>
 
+          </>
+        ) : (
+          <>
+            {/* KPI Statistics for Branches */}
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-icon red">
+                  <TrendingUp size={22} />
+                </div>
+                <div className="stat-info">
+                  <span className="stat-label">สาขาที่ได้รับการประเมิน</span>
+                  <span className="stat-value">{branchSummaryStats.totalDistinctBranches} สาขา</span>
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-icon green" style={{ backgroundColor: '#E8F5E9', color: '#2E7D32' }}>
+                  <Award size={22} />
+                </div>
+                <div className="stat-info">
+                  <span className="stat-label">สาขาคะแนนเฉลี่ยสูงสุด</span>
+                  <span className="stat-value" style={{ fontSize: '15px', fontWeight: 700 }}>
+                    {branchSummaryStats.highestRated ? branchSummaryStats.highestRated.name : 'ไม่มีข้อมูล'}
+                  </span>
+                  {branchSummaryStats.highestRated && (
+                    <span style={{ fontSize: '11px', color: '#2E7D32', fontWeight: 600 }}>
+                      {branchSummaryStats.highestRated.average.toFixed(2)} / 4.00 (ประเมิน {branchSummaryStats.highestRated.count} ครั้ง)
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-icon yellow" style={{ backgroundColor: '#FFF3E0', color: '#E65100' }}>
+                  <AlertTriangle size={22} />
+                </div>
+                <div className="stat-info">
+                  <span className="stat-label">สาขาที่ควรปรับปรุงสูงสุด</span>
+                  <span className="stat-value" style={{ fontSize: '15px', fontWeight: 700 }}>
+                    {branchSummaryStats.lowestRated ? branchSummaryStats.lowestRated.name : 'ไม่มีข้อมูล'}
+                  </span>
+                  {branchSummaryStats.lowestRated && (
+                    <span style={{ fontSize: '11px', color: '#E65100', fontWeight: 600 }}>
+                      {branchSummaryStats.lowestRated.average.toFixed(2)} / 4.00 (ประเมิน {branchSummaryStats.lowestRated.count} ครั้ง)
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Leaderboard Cards */}
+            <div className="leaderboard-grid">
+              {/* Top 5 Branches */}
+              <div className="leaderboard-card">
+                <div className="leaderboard-title-row">
+                  <div className="leaderboard-title" style={{ color: '#2E7D32' }}>
+                    <Award size={18} />
+                    <span>อันดับสาขาคะแนนสูงสุด (Top 5 Branches)</span>
+                  </div>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>คะแนนเฉลี่ย</span>
+                </div>
+                <div className="leaderboard-list">
+                  {branchSummaryStats.topBranches.length > 0 ? (
+                    branchSummaryStats.topBranches.map((b, index) => (
+                      <div key={b.name} className="leaderboard-item">
+                        <div className="leaderboard-rank-info">
+                          <div className="leaderboard-rank">{index + 1}</div>
+                          <div>
+                            <div className="leaderboard-branch-name">{b.name}</div>
+                            <div className="leaderboard-reviews-count">ประเมิน {b.count} ครั้ง</div>
+                          </div>
+                        </div>
+                        <span className="badge badge-green">{b.average.toFixed(2)} / 4.00</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '16px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                      ไม่มีข้อมูล
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom 5 Branches */}
+              <div className="leaderboard-card">
+                <div className="leaderboard-title-row">
+                  <div className="leaderboard-title" style={{ color: '#C62828' }}>
+                    <AlertTriangle size={18} />
+                    <span>อันดับสาขาคะแนนต่ำสุด (Bottom 5 Branches)</span>
+                  </div>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>คะแนนเฉลี่ย</span>
+                </div>
+                <div className="leaderboard-list">
+                  {branchSummaryStats.bottomBranches.length > 0 ? (
+                    branchSummaryStats.bottomBranches.map((b, index) => {
+                      const rankNumber = branchSummaryStats.totalDistinctBranches - branchSummaryStats.bottomBranches.length + index + 1;
+                      return (
+                        <div key={b.name} className="leaderboard-item">
+                          <div className="leaderboard-rank-info">
+                            <div className="leaderboard-rank" style={{ backgroundColor: '#FEE2E2', color: '#EF4444' }}>{rankNumber}</div>
+                            <div>
+                              <div className="leaderboard-branch-name">{b.name}</div>
+                              <div className="leaderboard-reviews-count">ประเมิน {b.count} ครั้ง</div>
+                            </div>
+                          </div>
+                          <span className={`badge ${b.average >= 3.5 ? 'badge-green' : b.average >= 2.5 ? 'badge-orange' : 'badge-red'}`}>{b.average.toFixed(2)} / 4.00</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '16px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                      ไม่มีข้อมูล
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Branch Detailed Table */}
+            <div className="dashboard-card" style={{ padding: '24px 0px', marginTop: '24px' }}>
+              <div style={{ padding: '0px 24px 16px 24px', borderBottom: '1px solid var(--border-color)' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>ตารางประสิทธิภาพรายสาขาโดยละเอียด</h2>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  แสดงค่าเฉลี่ยของหัวข้อประเมิน 7 หมวดหมู่แยกรายสาขา (คะแนนเต็ม 4.00)
+                </p>
+              </div>
+
+              {/* Filters Toolbar */}
+              <div style={{ padding: '16px 24px', backgroundColor: '#F8FAFC', borderBottom: '1px solid var(--border-color)' }} className="toolbar">
+                <div className="filters-wrapper">
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Search size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
+                    <input
+                      type="text"
+                      placeholder="ค้นหาชื่อสาขา..."
+                      value={branchSearchTerm}
+                      onChange={(e) => { setBranchSearchTerm(e.target.value); setBranchCurrentPage(1); }}
+                      className="filter-input"
+                      style={{ paddingLeft: '34px' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>จัดเรียงตาม:</span>
+                    <select
+                      value={branchSortKey}
+                      onChange={(e) => { setBranchSortKey(e.target.value as any); setBranchCurrentPage(1); }}
+                      className="filter-input"
+                      style={{ cursor: 'pointer', minWidth: '150px' }}
+                    >
+                      <option value="average">คะแนนเฉลี่ยรวม</option>
+                      <option value="name">ชื่อสาขา</option>
+                      <option value="count">จำนวนครั้งที่ประเมิน</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>ลำดับ:</span>
+                    <select
+                      value={branchSortOrder}
+                      onChange={(e) => { setBranchSortOrder(e.target.value as any); setBranchCurrentPage(1); }}
+                      className="filter-input"
+                      style={{ cursor: 'pointer', minWidth: '100px' }}
+                    >
+                      <option value="desc">มาก {"->"} น้อย</option>
+                      <option value="asc">น้อย {"->"} มาก</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handleExportBranchExcel} 
+                  disabled={branchPerformance.length === 0}
+                  className="btn btn-primary" 
+                  style={{ backgroundColor: 'var(--primary-green)', padding: '10px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <FileSpreadsheet size={15} /> ส่งออกรายงานแยกรายสาขา
+                </button>
+              </div>
+
+              {/* Table */}
+              <div style={{ padding: '0px 24px' }}>
+                <div className="table-responsive" style={{ border: 'none', boxShadow: 'none' }}>
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>ชื่อสาขา</th>
+                        <th style={{ textAlign: 'center' }}>จำนวนการประเมิน</th>
+                        <th style={{ textAlign: 'center' }}>คะแนนเฉลี่ยรวม</th>
+                        <th style={{ textAlign: 'center' }} title="5. การสอนมีความชัดเจน เป็นลำดับขั้นตอน ไม่สับสน">Q5 การสอน</th>
+                        <th style={{ textAlign: 'center' }} title="6. ปริมาณเนื้อหาและงานมีความเหมาะสมกับเวลา">Q6 เนื้อหา</th>
+                        <th style={{ textAlign: 'center' }} title="7. อุปกรณ์เครื่องมือ หรือเอกสารประกอบการสอนพร้อมใช้งาน">Q7 อุปกรณ์</th>
+                        <th style={{ textAlign: 'center' }} title="8. พี่เลี้ยงมีความรู้ความเชี่ยวชาญ ถ่ายทอดเนื้อหาได้เข้าใจ">Q8 พี่เลี้ยง(ความรู้)</th>
+                        <th style={{ textAlign: 'center' }} title="9. พี่เลี้ยงสอนเรื่องความปลอดภัยและสุขอนามัย (Food Safety)">Q9 ความปลอดภัย</th>
+                        <th style={{ textAlign: 'center' }} title="10. พี่เลี้ยงมีความใส่ใจ เป็นมิตร เปิดโอกาสให้สอบถาม">Q10 พี่เลี้ยง(ใส่ใจ)</th>
+                        <th style={{ textAlign: 'center' }} title="11. ภาพรวมทีมงานและบรรยากาศในสาขาให้การต้อนรับดี">Q11 บรรยากาศ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedBranchPerformance.length > 0 ? (
+                        paginatedBranchPerformance.map((b) => (
+                          <tr key={b.branchName} style={{ cursor: 'default' }}>
+                            <td style={{ fontWeight: 600 }}>{b.branchName}</td>
+                            <td style={{ textAlign: 'center' }}>{b.responseCount} ครั้ง</td>
+                            <td style={{ textAlign: 'center' }}>
+                              <span className={`badge ${getBranchBadgeClass(b.avgTotal)}`}>
+                                {b.avgTotal.toFixed(2)}
+                              </span>
+                            </td>
+                            <td style={{ textAlign: 'center' }}>{b.avgQ5.toFixed(2)}</td>
+                            <td style={{ textAlign: 'center' }}>{b.avgQ6.toFixed(2)}</td>
+                            <td style={{ textAlign: 'center' }}>{b.avgQ7.toFixed(2)}</td>
+                            <td style={{ textAlign: 'center' }}>{b.avgQ8.toFixed(2)}</td>
+                            <td style={{ textAlign: 'center' }}>{b.avgQ9.toFixed(2)}</td>
+                            <td style={{ textAlign: 'center' }}>{b.avgQ10.toFixed(2)}</td>
+                            <td style={{ textAlign: 'center' }}>{b.avgQ11.toFixed(2)}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={10} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                            ไม่พบข้อมูลผลลัพธ์แบบประเมินรายสาขาที่ค้นหา
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Branch Pagination Controls */}
+                {totalBranchPages > 1 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                      แสดงหน้า {branchCurrentPage} จากทั้งหมด {totalBranchPages} หน้า (พบ {branchPerformance.length} สาขา)
+                    </span>
+                    
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        disabled={branchCurrentPage === 1}
+                        onClick={() => setBranchCurrentPage(p => p - 1)}
+                        className="btn btn-secondary"
+                        style={{ padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        ก่อนหน้า
+                      </button>
+                      <button
+                        disabled={branchCurrentPage === totalBranchPages}
+                        onClick={() => setBranchCurrentPage(p => p + 1)}
+                        className="btn btn-secondary"
+                        style={{ padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        ถัดไป
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
       </main>
+
 
       {/* Details Slideover/Modal Overlay */}
       {selectedResponse && (
