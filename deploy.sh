@@ -25,14 +25,18 @@ set -e
 
 cd /home/web
 
-if [ ! -d "trainingsurvey" ]; then
-  echo "📥 Cloning project repository..."
-  git clone https://github.com/mizae1234/trainingsurvey.git
+if [ ! -d "trainingsurvey/.git" ]; then
+  echo "📥 Initializing git repository..."
   cd trainingsurvey
+  git init
+  git remote add origin https://github.com/mizae1234/trainingsurvey.git
+  git fetch origin
+  git checkout -f main
 else
   echo "📥 Pulling latest code..."
   cd trainingsurvey
-  git pull origin main
+  git fetch origin
+  git reset --hard origin/main
 fi
 
 # Ensure .env is present (was copied by scp)
