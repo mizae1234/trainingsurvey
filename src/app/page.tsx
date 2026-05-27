@@ -155,7 +155,7 @@ export default function SurveyPage() {
     setSubmitError(null);
 
     try {
-      const result = await submitSurvey(formData);
+      const result = await submitSurvey({ ...formData, userAgent: navigator.userAgent });
       if (result.success) {
         setStep(5); // Success step
       } else {

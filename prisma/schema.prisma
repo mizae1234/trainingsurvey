@@ -10,6 +10,10 @@ model SurveyResponse {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
 
+  // Client metadata
+  ipAddress String?
+  userAgent String?
+
   // Section 1: General Info (ส่วนที่ 1)
   branch1                   String
   branch1TrainingStart      DateTime

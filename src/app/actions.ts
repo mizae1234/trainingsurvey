@@ -1,6 +1,7 @@
 'use server';
 
 import db from '@/lib/db';
+import { headers } from 'next/headers';
 
 export async function submitSurvey(data: any) {
   try {
@@ -9,7 +10,16 @@ export async function submitSurvey(data: any) {
       return { success: false, error: 'กรุณาเลือกสาขาให้ครบถ้วน' };
     }
 
+    // Capture client metadata
+    const headersList = await headers();
+    const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || headersList.get('x-real-ip')
+      || 'unknown';
+    const userAgent = data.userAgent || headersList.get('user-agent') || 'unknown';
+
     const parsedData = {
+      ipAddress,
+      userAgent,
       branch1: data.branch1,
       branch1TrainingStart: new Date(data.branch1TrainingStart),
       branch1TrainingEnd: new Date(data.branch1TrainingEnd),
