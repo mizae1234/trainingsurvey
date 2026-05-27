@@ -11,8 +11,8 @@ export async function adminLogin(password: string) {
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE_NAME, 'authenticated', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: false, // Set to false to support deployments running over HTTP (no SSL)
+      sameSite: 'lax', // Lax is more compatible with external app redirects (e.g. from LINE)
       maxAge: 60 * 60 * 24, // 24 hours
       path: '/'
     });
