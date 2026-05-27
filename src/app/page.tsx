@@ -260,7 +260,7 @@ export default function SurveyPage() {
                   <div className="form-grid">
                     <div className="form-group">
                       <label className="form-label">ช่วงวันที่เข้ารับการฝึกอบรม <span>*</span></label>
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <div className="date-picker-group">
                         <input
                           type="date"
                           className="form-input"
@@ -313,7 +313,7 @@ export default function SurveyPage() {
                   <div className="form-grid">
                     <div className="form-group">
                       <label className="form-label">ช่วงวันที่เข้ารับการฝึกอบรม <span>*</span></label>
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <div className="date-picker-group">
                         <input
                           type="date"
                           className="form-input"
