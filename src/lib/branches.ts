@@ -1,4 +1,4 @@
-export const BRANCHES = [
+const rawBranches = [
   "Robinson Sukhumvit",
   "Max Valu Srinakarin",
   "Imperial Samrong",
@@ -245,3 +245,5 @@ export const BRANCHES = [
   "Tesco Amata Nakorn",
   "Donmueng Domestic Airside"
 ];
+
+export const BRANCHES = [...rawBranches].sort((a, b) => a.localeCompare(b));
