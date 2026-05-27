@@ -1,0 +1,61 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model SurveyResponse {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  // Section 1: General Info (ส่วนที่ 1)
+  branch1                   String
+  branch1TrainingStart      DateTime
+  branch1TrainingEnd        DateTime
+  branch1Duration           Int
+  
+  branch2                   String
+  branch2TrainingStart      DateTime
+  branch2TrainingEnd        DateTime
+  branch2Duration           Int
+
+  // Section 2: General Training Feedback (ส่วนที่ 2 - เกณฑ์ 1-4)
+  q1_benefit                Int      // การฝึกหน้าร้านมีประโยชน์และช่วยให้เข้าใจผลิตภัณฑ์/บริการของบริษัทมากขึ้น
+  q2_apply_knowledge        Int      // สามารถนำความรู้และทักษะที่ได้รับจากหน้าร้าน ไปปรับ/ประยุกต์ใช้กับการทำงานในสายงานที่ปฏิบัติได้
+  q3_consistency            Int      // แนวทางการปฏิบัติงานและคำแนะนำที่ได้รับจากทั้ง 2 สาขา เป็นไปในทิศทางเดียวกัน
+
+  // Section 2.4: Suitability (ส่วนที่ 2 ข้อ 4.1 และ 4.2)
+  q4_1_duration_suitability String   // ระยะเวลาในการฝึกหน้าร้าน (น้อยเกินไป, มีความเหมาะสม, มากเกินไป)
+  q4_2_branches_suitability String   // จำนวนสาขาในการฝึกหน้าร้าน (น้อยเกินไป, มีความเหมาะสม, มากเกินไป)
+
+  // Section 3: Branch Evaluations (ส่วนที่ 3 - เกณฑ์ 1-4)
+  // 5. การสอนในแต่ละส่วนงาน มีความชัดเจน เป็นลำดับขั้นตอน ไม่สับสน
+  q5_clarity_branch1        Int
+  q5_clarity_branch2        Int
+  // 6. ปริมาณเนื้อหาและงานที่ได้รับ มีความเหมาะสมกับเวลาที่กำหนดไว้
+  q6_volume_branch1         Int
+  q6_volume_branch2         Int
+  // 7. สาขามีการจัดเตรียมอุปกรณ์เครื่องมือ หรือเอกสารประกอบการสอนไว้ให้อย่างพร้อมใช้งาน
+  q7_readiness_branch1      Int
+  q7_readiness_branch2      Int
+  // 8. พี่เลี้ยง/ผู้สอน มีความรู้ ความเชี่ยวชาญ สามารถอธิบาย/ถ่ายทอดเนื้อหาได้อย่างเข้าใจ
+  q8_trainer_knowledge_branch1  Int
+  q8_trainer_knowledge_branch2  Int
+  // 9. พี่เลี้ยง/ผู้สอนได้อธิบายและให้ความสำคัญเรื่องความปลอดภัยหน้างานและมาตรฐานสุขอนามัย (Food Safety)
+  q9_safety_hygiene_branch1 Int
+  q9_safety_hygiene_branch2 Int
+  // 10. พี่เลี้ยง/ผู้สอน มีความใส่ใจ เป็นมิตร และเปิดโอกาสให้สอบถามข้อสงสัย
+  q10_trainer_care_branch1  Int
+  q10_trainer_care_branch2  Int
+  // 11. ภาพรวมทีมงานและบรรยากาศในสาขา ให้การต้อนรับและสนับสนุนการเรียนรู้ของท่าน
+  q11_atmosphere_branch1    Int
+  q11_atmosphere_branch2    Int
+
+  // Section 4: Open-ended Feedback (ส่วนที่ 4)
+  feedback12_challenging    String?  // งานในส่วนใดหรือเนื้อหาใด ที่ท่านคิดว่า "เข้าใจยาก/ท้าทายที่สุด" เพราะเหตุใด
+  feedback13_ideal_setup    String?  // ท่านคิดว่าจำนวนวันและจำนวนสาขาที่เหมาะสมในการฝึกหน้าร้านนี้ควรเป็นอย่างไร
+  feedback14_impressions    String?  // สิ่งที่ประทับใจในการฝึกหน้าร้าน
+  feedback15_suggestions    String?  // ข้อเสนอแนะอื่นๆ เพื่อการพัฒนาโปรแกรมการฝึกหน้าร้านต่อไป
+}
