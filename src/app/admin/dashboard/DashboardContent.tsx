@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { adminLogout } from '@/app/actions/admin';
+import * as XLSX from 'xlsx';
 import { 
   BarChart, 
   Download, 
@@ -169,8 +170,8 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
     };
   }, [filteredResponses]);
 
-  // CSV Export utility with BOM for Excel Thai language support
-  const handleExportCSV = () => {
+  // Export directly to Excel (.xlsx) format using SheetJS (xlsx)
+  const handleExportExcel = () => {
     const headers = [
       'ไอดี', 'วันที่ประเมิน', 'สาขาที่ 1', 'วันที่เริ่ม (สาขา 1)', 'วันที่สิ้นสุด (สาขา 1)', 'ระยะเวลา (วัน)',
       'สาขาที่ 2', 'วันที่เริ่ม (สาขา 2)', 'วันที่สิ้นสุด (สาขา 2)', 'ระยะเวลา (วัน)',
@@ -187,7 +188,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
       'ส่วนที่ 4 ข้อ 14 (ความประทับใจ)', 'ส่วนที่ 4 ข้อ 15 (ข้อเสนอแนะอื่นๆ)'
     ];
 
-    const rows = filteredResponses.map(r => [
+    const dataRows = filteredResponses.map(r => [
       r.id,
       new Date(r.createdAt).toLocaleDateString('th-TH'),
       r.branch1,
@@ -217,22 +218,21 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
       r.q10_trainer_care_branch2,
       r.q11_atmosphere_branch1,
       r.q11_atmosphere_branch2,
-      `"${(r.feedback12_challenging || '').replace(/"/g, '""')}"`,
-      `"${(r.feedback13_ideal_setup || '').replace(/"/g, '""')}"`,
-      `"${(r.feedback14_impressions || '').replace(/"/g, '""')}"`,
-      `"${(r.feedback15_suggestions || '').replace(/"/g, '""')}"`
+      r.feedback12_challenging || '',
+      r.feedback13_ideal_setup || '',
+      r.feedback14_impressions || '',
+      r.feedback15_suggestions || ''
     ]);
 
-    // Prepend UTF-8 BOM
-    const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `survey_responses_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Create a new workbook and convert data rows to a worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
+
+    // Append worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, "ผลลัพธ์แบบประเมิน");
+
+    // Save/Download Excel file
+    XLSX.writeFile(wb, `survey_responses_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const handleLogout = async () => {
@@ -566,12 +566,12 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
             </div>
 
             <button 
-              onClick={handleExportCSV} 
+              onClick={handleExportExcel} 
               disabled={filteredResponses.length === 0}
               className="btn btn-primary" 
               style={{ backgroundColor: 'var(--primary-green)', padding: '10px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <Download size={15} /> ส่งออกไฟล์ Excel (CSV)
+              <FileSpreadsheet size={15} /> ส่งออกไฟล์ Excel (.xlsx)
             </button>
           </div>
 
