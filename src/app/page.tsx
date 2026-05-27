@@ -909,6 +909,7 @@ export default function SurveyPage() {
             <div className="wizard-footer">
               {step > 1 ? (
                 <button
+                  key="back-btn"
                   type="button"
                   className="btn btn-secondary"
                   onClick={handleBack}
@@ -917,11 +918,12 @@ export default function SurveyPage() {
                   <ChevronLeft size={16} /> กลับ
                 </button>
               ) : (
-                <div /> // Placeholder to align next button to the right
+                <div key="back-placeholder" /> // Placeholder to align next button to the right
               )}
 
               {step < 4 ? (
                 <button
+                  key="next-btn"
                   type="button"
                   className="btn btn-primary"
                   onClick={handleNext}
@@ -930,6 +932,7 @@ export default function SurveyPage() {
                 </button>
               ) : (
                 <button
+                  key="submit-btn"
                   type="submit"
                   className="btn btn-primary"
                   style={{ backgroundColor: 'var(--primary-green)' }}
