@@ -10,15 +10,19 @@ SERVER="root@srv1100100.hstgr.cloud"
 REMOTE_DIR="/home/web/trainingsurvey"
 
 echo ""
+echo "🚀 Preparing remote directory on ${SERVER}..."
+ssh "$SERVER" mkdir -p "$REMOTE_DIR"
+
+echo "📤 Uploading environment configuration..."
+scp .env "$SERVER":"$REMOTE_DIR/.env"
+
+echo ""
 echo "🚀 Deploying Training Survey to ${SERVER}..."
 echo "============================================"
 
 ssh "$SERVER" bash -s <<'EOF'
 set -e
 
-echo ""
-echo "📂 Setting up /home/web path..."
-mkdir -p /home/web
 cd /home/web
 
 if [ ! -d "trainingsurvey" ]; then
@@ -29,6 +33,12 @@ else
   echo "📥 Pulling latest code..."
   cd trainingsurvey
   git pull origin main
+fi
+
+# Ensure .env is present (was copied by scp)
+if [ ! -f ".env" ]; then
+  echo "❌ .env file not found!"
+  exit 1
 fi
 
 echo ""
