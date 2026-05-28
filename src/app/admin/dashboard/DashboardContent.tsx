@@ -894,8 +894,9 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                           <td style={{ fontWeight: 500 }}>{res.branch2}</td>
                           <td style={{ textAlign: 'center' }}>{totalDays} วัน</td>
                           <td style={{ textAlign: 'center' }}>
-                            <span className={`badge ${getRatingBadgeClass(rowAvg)}`}>
-                              {rowAvg.toFixed(2)} / 4.00
+                            <span className={`badge ${getRatingBadgeClass(rowAvg)}`} style={{ display: 'inline-flex', flexDirection: 'column', gap: '2px', padding: '6px 10px', minWidth: '80px' }}>
+                              <span style={{ fontWeight: 600 }}>{rowAvg.toFixed(2)} / 4.00</span>
+                              <span style={{ fontSize: '9.5px', opacity: 0.9 }}>{((rowAvg / 4) * 100).toFixed(1)}%</span>
                             </span>
                           </td>
                           <td style={{ textAlign: 'right' }}>
