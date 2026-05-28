@@ -26,6 +26,7 @@ import {
 interface ResponseData {
   id: string;
   createdAt: string;
+  department: string | null;
   branch1: string;
   branch1TrainingStart: string;
   branch1TrainingEnd: string;
@@ -382,7 +383,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
   // Export directly to Excel (.xlsx) format using SheetJS (xlsx)
   const handleExportExcel = () => {
     const headers = [
-      'ไอดี', 'วันที่ประเมิน', 'สาขาที่ 1', 'วันที่เริ่ม (สาขา 1)', 'วันที่สิ้นสุด (สาขา 1)', 'ระยะเวลา (วัน)',
+      'ไอดี', 'วันที่ประเมิน', 'ฝ่ายงานที่ท่านสังกัด', 'สาขาที่ 1', 'วันที่เริ่ม (สาขา 1)', 'วันที่สิ้นสุด (สาขา 1)', 'ระยะเวลา (วัน)',
       'สาขาที่ 2', 'วันที่เริ่ม (สาขา 2)', 'วันที่สิ้นสุด (สาขา 2)', 'ระยะเวลา (วัน)',
       'ส่วนที่ 2 ข้อ 1 (ประโยชน์)', 'ส่วนที่ 2 ข้อ 2 (นำไปใช้)', 'ส่วนที่ 2 ข้อ 3 (ความสอดคล้อง)',
       'ส่วนที่ 2 ข้อ 4.1 (ความเหมาะสมของเวลา)', 'ส่วนที่ 2 ข้อ 4.2 (ความเหมาะสมของจำนวนสาขา)',
@@ -400,6 +401,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
     const dataRows = filteredResponses.map(r => [
       r.id,
       new Date(r.createdAt).toLocaleDateString('th-TH'),
+      r.department || '',
       r.branch1,
       new Date(r.branch1TrainingStart).toLocaleDateString('th-TH'),
       new Date(r.branch1TrainingEnd).toLocaleDateString('th-TH'),
@@ -898,6 +900,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                 <thead>
                   <tr>
                     <th>วันที่ประเมิน</th>
+                    <th>ฝ่ายงานที่สังกัด</th>
                     <th>สาขาที่ 1</th>
                     <th>สาขาที่ 2</th>
                     <th style={{ textAlign: 'center' }}>เวลาฝึกอบรม (วัน)</th>
@@ -915,6 +918,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                       return (
                         <tr key={res.id} onClick={() => setSelectedResponse(res)}>
                           <td>{formatDate(res.createdAt)}</td>
+                          <td style={{ fontWeight: 500 }}>{res.department}</td>
                           <td style={{ fontWeight: 500 }}>{res.branch1}</td>
                           <td style={{ fontWeight: 500 }}>{res.branch2}</td>
                           <td style={{ textAlign: 'center' }}>{totalDays} วัน</td>
@@ -940,7 +944,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                     })
                   ) : (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
                         ไม่พบข้อมูลผลลัพธ์แบบสอบถามที่ค้นหา
                       </td>
                     </tr>
@@ -1262,6 +1266,14 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
 
             <div className="modal-body">
               
+              {/* Department */}
+              <div className="detail-sec" style={{ paddingBottom: '16px', borderBottom: '1px solid var(--border-color)', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <span className="detail-label" style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px' }}>ฝ่ายงานที่สังกัด:</span>
+                  <span className="detail-val" style={{ fontWeight: 600, fontSize: '14px', color: 'var(--primary-red)' }}>{selectedResponse.department || 'ไม่พบข้อมูล'}</span>
+                </div>
+              </div>
+
               {/* Section 1 */}
               <div className="detail-sec">
                 <div className="detail-sec-title">ส่วนที่ 1: ข้อมูลการฝึกหน้าร้าน</div>

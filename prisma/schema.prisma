@@ -15,6 +15,7 @@ model SurveyResponse {
   userAgent String?
 
   // Section 1: General Info (ส่วนที่ 1)
+  department                String?
   branch1                   String
   branch1TrainingStart      DateTime
   branch1TrainingEnd        DateTime

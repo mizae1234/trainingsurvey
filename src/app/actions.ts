@@ -6,8 +6,8 @@ import { headers } from 'next/headers';
 export async function submitSurvey(data: any) {
   try {
     // Basic validation
-    if (!data.branch1 || !data.branch2) {
-      return { success: false, error: 'กรุณาเลือกสาขาให้ครบถ้วน' };
+    if (!data.department || !data.branch1 || !data.branch2) {
+      return { success: false, error: 'กรุณากรอกข้อมูลและเลือกสาขาให้ครบถ้วน' };
     }
 
     // Capture client metadata
@@ -20,6 +20,7 @@ export async function submitSurvey(data: any) {
     const parsedData = {
       ipAddress,
       userAgent,
+      department: data.department,
       branch1: data.branch1,
       branch1TrainingStart: new Date(data.branch1TrainingStart),
       branch1TrainingEnd: new Date(data.branch1TrainingEnd),
