@@ -556,8 +556,8 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
               <Users size={22} />
             </div>
             <div className="stat-info">
-              <span className="stat-label">แบบฟอร์มที่ส่งทั้งหมด</span>
-              <span className="stat-value">{stats.total} ฟอร์ม</span>
+              <span className="stat-label">แบบประเมินที่ส่งทั้งหมด</span>
+              <span className="stat-value">{stats.total} ชุด</span>
             </div>
           </div>
 
@@ -567,12 +567,15 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
             </div>
             <div className="stat-info">
               <span className="stat-label">ความพึงพอใจภาพรวม</span>
-              <span className="stat-value" style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                {stats.avgGeneral} <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>/ 4.00</span>
+              <span className="stat-value" style={{ display: 'flex', alignItems: 'baseline', gap: '4px', flexWrap: 'wrap' }}>
+                {stats.avgGeneral} 
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>/ 4.00</span>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--primary-red)', marginLeft: '4px' }}>
+                  ({((stats.avgGeneral / 4) * 100).toFixed(1)}%)
+                </span>
               </span>
             </div>
           </div>
-
 
         </div>
 
@@ -722,7 +725,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                 {/* Q4.1: Duration */}
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px', fontWeight: '500' }}>
-                    <span>4.1 ระยะเวลาในการฝึกอบรม</span>
+                    <span>4.1 ระยะเวลาในการฝึกหน้าร้าน</span>
                     <span style={{ color: 'var(--text-muted)' }}>รวม {stats.total} คน</span>
                   </div>
                   
@@ -759,7 +762,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                 {/* Q4.2: Branches Count */}
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px', fontWeight: '500' }}>
-                    <span>4.2 จำนวนสาขาที่ฝึกอบรม</span>
+                    <span>4.2 จำนวนสาขาในการฝึกหน้าร้าน</span>
                     <span style={{ color: 'var(--text-muted)' }}>รวม {stats.total} คน</span>
                   </div>
                   
@@ -871,7 +874,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                     <th>ฝ่ายงานที่สังกัด</th>
                     <th>สาขาที่ 1</th>
                     <th>สาขาที่ 2</th>
-                    <th style={{ textAlign: 'center' }}>เวลาฝึกอบรม (วัน)</th>
+                    <th style={{ textAlign: 'center' }}>เวลาฝึกหน้าร้าน (วัน)</th>
                     <th style={{ textAlign: 'center' }}>ประเมินเฉลี่ยภาพรวม</th>
                     <th style={{ textAlign: 'right' }}>เครื่องมือ</th>
                   </tr>
@@ -925,7 +928,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
             {totalPages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  แสดงหน้า {currentPage} จากทั้งหมด {totalPages} หน้า (พบ {filteredResponses.length} ฟอร์ม)
+                  แสดงหน้า {currentPage} จากทั้งหมด {totalPages} หน้า (พบ {filteredResponses.length} ชุด)
                 </span>
                 
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -979,7 +982,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                   </span>
                   {branchSummaryStats.highestRated && (
                     <span style={{ fontSize: '11px', color: '#2E7D32', fontWeight: 600 }}>
-                      {branchSummaryStats.highestRated.average.toFixed(2)} / 4.00 (ประเมิน {branchSummaryStats.highestRated.count} ครั้ง)
+                      {branchSummaryStats.highestRated.average.toFixed(2)} / 4.00 ({((branchSummaryStats.highestRated.average / 4) * 100).toFixed(1)}%) (ประเมิน {branchSummaryStats.highestRated.count} ครั้ง)
                     </span>
                   )}
                 </div>
@@ -996,7 +999,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                   </span>
                   {branchSummaryStats.lowestRated && (
                     <span style={{ fontSize: '11px', color: '#E65100', fontWeight: 600 }}>
-                      {branchSummaryStats.lowestRated.average.toFixed(2)} / 4.00 (ประเมิน {branchSummaryStats.lowestRated.count} ครั้ง)
+                      {branchSummaryStats.lowestRated.average.toFixed(2)} / 4.00 ({((branchSummaryStats.lowestRated.average / 4) * 100).toFixed(1)}%) (ประเมิน {branchSummaryStats.lowestRated.count} ครั้ง)
                     </span>
                   )}
                 </div>
@@ -1025,7 +1028,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                             <div className="leaderboard-reviews-count">ประเมิน {b.count} ครั้ง</div>
                           </div>
                         </div>
-                        <span className="badge badge-green">{b.average.toFixed(2)} / 4.00</span>
+                        <span className="badge badge-green">{b.average.toFixed(2)} / 4.00 ({((b.average / 4) * 100).toFixed(1)}%)</span>
                       </div>
                     ))
                   ) : (
@@ -1058,7 +1061,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                               <div className="leaderboard-reviews-count">ประเมิน {b.count} ครั้ง</div>
                             </div>
                           </div>
-                          <span className={`badge ${b.average >= 3.5 ? 'badge-green' : b.average >= 2.5 ? 'badge-orange' : 'badge-red'}`}>{b.average.toFixed(2)} / 4.00</span>
+                          <span className={`badge ${b.average >= 3.5 ? 'badge-green' : b.average >= 2.5 ? 'badge-orange' : 'badge-red'}`}>{b.average.toFixed(2)} / 4.00 ({((b.average / 4) * 100).toFixed(1)}%)</span>
                         </div>
                       );
                     })
@@ -1158,17 +1161,39 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                             <td style={{ fontWeight: 600 }}>{b.branchName}</td>
                             <td style={{ textAlign: 'center' }}>{b.responseCount} ครั้ง</td>
                             <td style={{ textAlign: 'center' }}>
-                              <span className={`badge ${getBranchBadgeClass(b.avgTotal)}`}>
-                                {b.avgTotal.toFixed(2)}
+                              <span className={`badge ${getBranchBadgeClass(b.avgTotal)}`} style={{ display: 'inline-flex', flexDirection: 'column', gap: '2px', padding: '6px 10px', minWidth: '60px' }}>
+                                <span style={{ fontWeight: 600 }}>{b.avgTotal.toFixed(2)}</span>
+                                <span style={{ fontSize: '9px', opacity: 0.9 }}>{((b.avgTotal / 4) * 100).toFixed(1)}%</span>
                               </span>
                             </td>
-                            <td style={{ textAlign: 'center' }}>{b.avgQ5.toFixed(2)}</td>
-                            <td style={{ textAlign: 'center' }}>{b.avgQ6.toFixed(2)}</td>
-                            <td style={{ textAlign: 'center' }}>{b.avgQ7.toFixed(2)}</td>
-                            <td style={{ textAlign: 'center' }}>{b.avgQ8.toFixed(2)}</td>
-                            <td style={{ textAlign: 'center' }}>{b.avgQ9.toFixed(2)}</td>
-                            <td style={{ textAlign: 'center' }}>{b.avgQ10.toFixed(2)}</td>
-                            <td style={{ textAlign: 'center' }}>{b.avgQ11.toFixed(2)}</td>
+                            <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                              <div>{b.avgQ5.toFixed(2)}</div>
+                              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{((b.avgQ5 / 4) * 100).toFixed(1)}%</div>
+                            </td>
+                            <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                              <div>{b.avgQ6.toFixed(2)}</div>
+                              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{((b.avgQ6 / 4) * 100).toFixed(1)}%</div>
+                            </td>
+                            <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                              <div>{b.avgQ7.toFixed(2)}</div>
+                              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{((b.avgQ7 / 4) * 100).toFixed(1)}%</div>
+                            </td>
+                            <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                              <div>{b.avgQ8.toFixed(2)}</div>
+                              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{((b.avgQ8 / 4) * 100).toFixed(1)}%</div>
+                            </td>
+                            <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                              <div>{b.avgQ9.toFixed(2)}</div>
+                              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{((b.avgQ9 / 4) * 100).toFixed(1)}%</div>
+                            </td>
+                            <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                              <div>{b.avgQ10.toFixed(2)}</div>
+                              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{((b.avgQ10 / 4) * 100).toFixed(1)}%</div>
+                            </td>
+                            <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                              <div>{b.avgQ11.toFixed(2)}</div>
+                              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{((b.avgQ11 / 4) * 100).toFixed(1)}%</div>
+                            </td>
                           </tr>
                         ))
                       ) : (

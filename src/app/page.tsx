@@ -128,23 +128,23 @@ export default function SurveyPage() {
     if (currentStep === 1) {
       if (!formData.department) newErrors.department = 'กรุณาเลือกฝ่ายงานที่ท่านสังกัด';
       if (!formData.branch1) newErrors.branch1 = 'กรุณาเลือกสาขาที่ 1';
-      if (!formData.branch1TrainingStart) newErrors.branch1TrainingStart = 'กรุณาระบุวันเริ่มต้นฝึกอบรม';
-      if (!formData.branch1TrainingEnd) newErrors.branch1TrainingEnd = 'กรุณาระบุวันสิ้นสุดฝึกอบรม';
+      if (!formData.branch1TrainingStart) newErrors.branch1TrainingStart = 'กรุณาระบุวันเริ่มต้นฝึกหน้าร้าน';
+      if (!formData.branch1TrainingEnd) newErrors.branch1TrainingEnd = 'กรุณาระบุวันสิ้นสุดฝึกหน้าร้าน';
 
       const start1 = new Date(formData.branch1TrainingStart);
       const end1 = new Date(formData.branch1TrainingEnd);
       if (formData.branch1TrainingStart && formData.branch1TrainingEnd && end1 < start1) {
-        newErrors.branch1TrainingEnd = 'วันสิ้นสุดการฝึกอบรมต้องอยู่หลังวันเริ่มต้น';
+        newErrors.branch1TrainingEnd = 'วันสิ้นสุดการฝึกหน้าร้านต้องอยู่หลังวันเริ่มต้น';
       }
 
       if (!formData.branch2) newErrors.branch2 = 'กรุณาเลือกสาขาที่ 2';
-      if (!formData.branch2TrainingStart) newErrors.branch2TrainingStart = 'กรุณาระบุวันเริ่มต้นฝึกอบรม';
-      if (!formData.branch2TrainingEnd) newErrors.branch2TrainingEnd = 'กรุณาระบุวันสิ้นสุดฝึกอบรม';
+      if (!formData.branch2TrainingStart) newErrors.branch2TrainingStart = 'กรุณาระบุวันเริ่มต้นฝึกหน้าร้าน';
+      if (!formData.branch2TrainingEnd) newErrors.branch2TrainingEnd = 'กรุณาระบุวันสิ้นสุดฝึกหน้าร้าน';
 
       const start2 = new Date(formData.branch2TrainingStart);
       const end2 = new Date(formData.branch2TrainingEnd);
       if (formData.branch2TrainingStart && formData.branch2TrainingEnd && end2 < start2) {
-        newErrors.branch2TrainingEnd = 'วันสิ้นสุดการฝึกอบรมต้องอยู่หลังวันเริ่มต้น';
+        newErrors.branch2TrainingEnd = 'วันสิ้นสุดการฝึกหน้าร้านต้องอยู่หลังวันเริ่มต้น';
       }
 
       if (formData.branch1 && formData.branch2 && formData.branch1 === formData.branch2) {
@@ -286,7 +286,7 @@ export default function SurveyPage() {
 
         {step === 1 && (
           <div className="survey-instructions">
-            <strong>คำชี้แจง:</strong> แบบสอบถามนี้จัดทำขึ้นเพื่อนำข้อมูลไปพัฒนาและปรับปรุงระบบการฝึกอบรมของหน่วยงานพัฒนาทรัพยากรบุคคล (HRD) โดยคำตอบของท่านจะถูกเก็บเป็นความลับและประมวลผล ซึ่งไม่มีผลต่อการประเมินผลการปฏิบัติงานใดๆ ทั้งสิ้น
+            <strong>คำชี้แจง:</strong> แบบสอบถามนี้จัดทำขึ้นเพื่อนำข้อมูลไปพัฒนาและปรับปรุงระบบการฝึกหน้าร้านของหน่วยงานพัฒนาทรัพยากรบุคคล (HRD) โดยคำตอบของท่านจะถูกเก็บเป็นความลับและประมวลผล ซึ่งไม่มีผลต่อการประเมินผลการปฏิบัติงานใดๆ ทั้งสิ้น
           </div>
         )}
 
@@ -324,13 +324,13 @@ export default function SurveyPage() {
                 {/* Branch 1 */}
                 <div className="branch-panel mb-4">
                   <div className="branch-panel-title">
-                    <span className="badge badge-red">การฝึกอบรมสาขาที่ 1</span>
+                    <span className="badge badge-red">การฝึกหน้าร้านสาขาที่ 1</span>
                   </div>
 
                   <div className="form-group">
                     <BranchSelect
                       id="branch1"
-                      label={<>สาขาที่ 1 ที่เข้าฝึกอบรม <span>*</span></>}
+                      label={<>สาขาที่ 1 ที่เข้าฝึกหน้าร้าน <span>*</span></>}
                       value={formData.branch1}
                       onChange={(val) => setFormData(prev => ({ ...prev, branch1: val }))}
                       error={errors.branch1}
@@ -339,7 +339,7 @@ export default function SurveyPage() {
 
                   <div className="form-grid">
                     <div className="form-group">
-                      <label className="form-label">ช่วงวันที่เข้ารับการฝึกอบรม <span>*</span></label>
+                      <label className="form-label">ช่วงวันที่เข้ารับการฝึกหน้าร้าน <span>*</span></label>
                       <div className="date-picker-group">
                         <DatePicker
                           value={formData.branch1TrainingStart}
@@ -373,13 +373,13 @@ export default function SurveyPage() {
                 {/* Branch 2 */}
                 <div className="branch-panel">
                   <div className="branch-panel-title">
-                    <span className="badge badge-yellow">การฝึกอบรมสาขาที่ 2</span>
+                    <span className="badge badge-yellow">การฝึกหน้าร้านสาขาที่ 2</span>
                   </div>
 
                   <div className="form-group">
                     <BranchSelect
                       id="branch2"
-                      label={<>สาขาที่ 2 ที่เข้าฝึกอบรม <span>*</span></>}
+                      label={<>สาขาที่ 2 ที่เข้าฝึกหน้าร้าน <span>*</span></>}
                       value={formData.branch2}
                       onChange={(val) => setFormData(prev => ({ ...prev, branch2: val }))}
                       error={errors.branch2}
@@ -388,7 +388,7 @@ export default function SurveyPage() {
 
                   <div className="form-grid">
                     <div className="form-group">
-                      <label className="form-label">ช่วงวันที่เข้ารับการฝึกอบรม <span>*</span></label>
+                      <label className="form-label">ช่วงวันที่เข้ารับการฝึกหน้าร้าน <span>*</span></label>
                       <div className="date-picker-group">
                         <DatePicker
                           value={formData.branch2TrainingStart}
@@ -427,7 +427,7 @@ export default function SurveyPage() {
                 <div className="section-header">
                   <div className="section-title">ส่วนที่ 2: ภาพรวมการฝึกหน้าร้าน</div>
                   <div className="section-desc">
-                    ประเมินภาพรวมความพึงพอใจการปฏิบัติงาน (เกณฑ์: 4 = เห็นด้วยอย่างยิ่ง 3 = เห็นด้วย 2 = ไม่เห็นด้วย 1 = ไม่เห็นด้วยอย่างยิ่ง)
+                    (เกณฑ์การประเมิน: 4 = เห็นด้วยอย่างยิ่ง 3 = เห็นด้วย 2 = ไม่เห็นด้วย 1 = ไม่เห็นด้วยอย่างยิ่ง)
                   </div>
                 </div>
 
@@ -498,8 +498,8 @@ export default function SurveyPage() {
                 </div>
 
                 {/* Q4 */}
-                <div style={{ marginTop: '32px' }} className="section-header">
-                  <div className="section-title">4. ความเหมาะสมของ "ระยะเวลา 5 วัน กับการเรียนรู้ใน 2 สาขา"</div>
+                <div style={{ marginTop: '28px', marginBottom: '16px' }} className="question-text">
+                  4. ความเหมาะสมของ "ระยะเวลา 5 วัน กับการเรียนรู้ใน 2 สาขา"
                 </div>
 
                 {/* Q4.1 */}
@@ -901,8 +901,8 @@ export default function SurveyPage() {
             {step === 4 && (
               <div className="step-content">
                 <div className="section-header">
-                  <div className="section-title">ส่วนที่ 4: ความคิดเห็นและข้อเสนอแนะเพิ่มเติม (Open-ended Feedback)</div>
-                  <div className="section-desc">ช่วยให้ข้อมูลเพิ่มเติมเพื่อประกอบการพัฒนาระบบฝึกอบรม (กรุณากรอกข้อมูลให้ครบถ้วน)</div>
+                  <div className="section-title">ส่วนที่ 4: ความคิดเห็นและข้อเสนอแนะเพิ่มเติม</div>
+                  <div className="section-desc">ช่วยให้ข้อมูลเพิ่มเติมเพื่อประกอบการพัฒนาโปรแกรมการฝึกหน้าร้าน (กรุณากรอกข้อมูลให้ครบถ้วน)</div>
                 </div>
 
                 {/* Q12 */}
@@ -1015,7 +1015,7 @@ export default function SurveyPage() {
                 <h2 className="success-title">ส่งแบบสอบถามเรียบร้อยแล้ว</h2>
                 <p className="success-message">
                   ฝ่ายทรัพยากรบุคคล (HRD) ขอขอบคุณสำหรับความร่วมมือในการตอบแบบสอบถาม
-                  ข้อมูลและข้อเสนอแนะของท่านจะมีประโยชน์อย่างยิ่งในการปรับปรุงและพัฒนาระบบการฝึกอบรมของเราต่อไป
+                  ข้อมูลและข้อเสนอแนะของท่านจะมีประโยชน์อย่างยิ่งในการปรับปรุงและพัฒนาระบบการฝึกหน้าร้านของเราต่อไป
                 </p>
                 <button
                   type="button"
