@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import BranchSelect from '@/components/BranchSelect';
 import SearchableSelect from '@/components/SearchableSelect';
 import DatePicker from '@/components/DatePicker';
-import { submitSurvey } from '@/app/actions';
+import { submitSurvey, getHolidays } from '@/app/actions';
 import {
   Building2,
   Calendar,
@@ -88,39 +88,73 @@ export default function SurveyPage() {
     feedback15_suggestions: '',
   });
 
+  const [holidays, setHolidays] = useState<string[]>([]);
+
+  // Load holidays from DB on mount
+  useEffect(() => {
+    async function loadHolidays() {
+      const res = await getHolidays();
+      if (res.success && res.holidays) {
+        const dates = res.holidays.map((h: any) => h.date.split('T')[0]);
+        setHolidays(dates);
+      }
+    }
+    loadHolidays();
+  }, []);
+
+  // Helper to calculate active working days excluding weekends and holidays
+  const calculateDuration = (startStr: string, endStr: string, holidayDates: string[]) => {
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    if (end < start) return 0;
+    
+    let workingDays = 0;
+    let current = new Date(start);
+    
+    while (current <= end) {
+      const dayOfWeek = current.getDay(); // 0 = Sunday, 6 = Saturday
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      
+      const yyyy = current.getFullYear();
+      const mm = String(current.getMonth() + 1).padStart(2, '0');
+      const dd = String(current.getDate()).padStart(2, '0');
+      const dateKey = `${yyyy}-${mm}-${dd}`;
+      
+      const isHoliday = holidayDates.includes(dateKey);
+      
+      if (!isWeekend && !isHoliday) {
+        workingDays++;
+      }
+      
+      current.setDate(current.getDate() + 1);
+    }
+    
+    return workingDays;
+  };
+
   const [errors, setErrors] = useState<FormErrors>({});
 
   // Auto-calculate Branch 1 Duration
   useEffect(() => {
     if (formData.branch1TrainingStart && formData.branch1TrainingEnd) {
-      const start = new Date(formData.branch1TrainingStart);
-      const end = new Date(formData.branch1TrainingEnd);
-      if (end >= start) {
-        const diffTime = Math.abs(end.getTime() - start.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        setFormData(prev => ({ ...prev, branch1Duration: diffDays.toString() }));
-        if (errors.branch1TrainingEnd || errors.branch1TrainingStart) {
-          setErrors(prev => ({ ...prev, branch1TrainingEnd: '', branch1TrainingStart: '' }));
-        }
+      const activeDays = calculateDuration(formData.branch1TrainingStart, formData.branch1TrainingEnd, holidays);
+      setFormData(prev => ({ ...prev, branch1Duration: activeDays.toString() }));
+      if (errors.branch1TrainingEnd || errors.branch1TrainingStart) {
+        setErrors(prev => ({ ...prev, branch1TrainingEnd: '', branch1TrainingStart: '' }));
       }
     }
-  }, [formData.branch1TrainingStart, formData.branch1TrainingEnd]);
+  }, [formData.branch1TrainingStart, formData.branch1TrainingEnd, holidays]);
 
   // Auto-calculate Branch 2 Duration
   useEffect(() => {
     if (formData.branch2TrainingStart && formData.branch2TrainingEnd) {
-      const start = new Date(formData.branch2TrainingStart);
-      const end = new Date(formData.branch2TrainingEnd);
-      if (end >= start) {
-        const diffTime = Math.abs(end.getTime() - start.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        setFormData(prev => ({ ...prev, branch2Duration: diffDays.toString() }));
-        if (errors.branch2TrainingEnd || errors.branch2TrainingStart) {
-          setErrors(prev => ({ ...prev, branch2TrainingEnd: '', branch2TrainingStart: '' }));
-        }
+      const activeDays = calculateDuration(formData.branch2TrainingStart, formData.branch2TrainingEnd, holidays);
+      setFormData(prev => ({ ...prev, branch2Duration: activeDays.toString() }));
+      if (errors.branch2TrainingEnd || errors.branch2TrainingStart) {
+        setErrors(prev => ({ ...prev, branch2TrainingEnd: '', branch2TrainingStart: '' }));
       }
     }
-  }, [formData.branch2TrainingStart, formData.branch2TrainingEnd]);
+  }, [formData.branch2TrainingStart, formData.branch2TrainingEnd, holidays]);
 
   const validateStep = (currentStep: number): boolean => {
     const newErrors: FormErrors = {};

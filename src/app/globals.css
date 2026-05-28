@@ -452,6 +452,7 @@ input[type="date"].form-input {
   cursor: pointer;
   transition: var(--transition);
   user-select: none;
+  min-height: 48px;
 }
 
 .rating-box input {
@@ -528,13 +529,13 @@ input[type="date"].form-input {
 
 /* Radio Group Custom Options (e.g. q4.1, q4.2) */
 .horizontal-choices {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
 .choice-box {
   position: relative;
-  flex: 1;
   border: 1px solid var(--border-color);
   background-color: var(--card-bg);
   border-radius: var(--radius-md);
@@ -569,7 +570,7 @@ input[type="date"].form-input {
 
 @media (max-width: 640px) {
   .horizontal-choices {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 8px;
   }
 }

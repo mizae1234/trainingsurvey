@@ -3,6 +3,34 @@
 import db from '@/lib/db';
 import { headers } from 'next/headers';
 
+// Helper function to calculate active working days (excluding weekends and holidays)
+function calculateDuration(start: Date, end: Date, holidayDates: Set<string>) {
+  if (end < start) return 0;
+  
+  let workingDays = 0;
+  let current = new Date(start);
+  
+  while (current <= end) {
+    const dayOfWeek = current.getDay(); // 0 = Sunday, 6 = Saturday
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    
+    const yyyy = current.getFullYear();
+    const mm = String(current.getMonth() + 1).padStart(2, '0');
+    const dd = String(current.getDate()).padStart(2, '0');
+    const dateKey = `${yyyy}-${mm}-${dd}`;
+    
+    const isHoliday = holidayDates.has(dateKey);
+    
+    if (!isWeekend && !isHoliday) {
+      workingDays++;
+    }
+    
+    current.setDate(current.getDate() + 1);
+  }
+  
+  return workingDays;
+}
+
 export async function submitSurvey(data: any) {
   try {
     // Basic validation
@@ -17,19 +45,34 @@ export async function submitSurvey(data: any) {
       || 'unknown';
     const userAgent = data.userAgent || headersList.get('user-agent') || 'unknown';
 
+    // Fetch holidays to verify duration
+    const holidays = await db.holiday.findMany();
+    const holidayDatesSet = new Set(holidays.map(h => {
+      const d = new Date(h.date);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }));
+
+    const b1Start = new Date(data.branch1TrainingStart);
+    const b1End = new Date(data.branch1TrainingEnd);
+    const b2Start = new Date(data.branch2TrainingStart);
+    const b2End = new Date(data.branch2TrainingEnd);
+
     const parsedData = {
       ipAddress,
       userAgent,
       department: data.department,
       branch1: data.branch1,
-      branch1TrainingStart: new Date(data.branch1TrainingStart),
-      branch1TrainingEnd: new Date(data.branch1TrainingEnd),
-      branch1Duration: parseInt(data.branch1Duration) || 0,
+      branch1TrainingStart: b1Start,
+      branch1TrainingEnd: b1End,
+      branch1Duration: calculateDuration(b1Start, b1End, holidayDatesSet),
       
       branch2: data.branch2,
-      branch2TrainingStart: new Date(data.branch2TrainingStart),
-      branch2TrainingEnd: new Date(data.branch2TrainingEnd),
-      branch2Duration: parseInt(data.branch2Duration) || 0,
+      branch2TrainingStart: b2Start,
+      branch2TrainingEnd: b2End,
+      branch2Duration: calculateDuration(b2Start, b2End, holidayDatesSet),
       
       q1_benefit: parseInt(data.q1_benefit) || 4,
       q2_apply_knowledge: parseInt(data.q2_apply_knowledge) || 4,
@@ -73,5 +116,57 @@ export async function submitSurvey(data: any) {
   } catch (error: any) {
     console.error('Error submitting survey:', error);
     return { success: false, error: error.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล' };
+  }
+}
+
+export async function getHolidays() {
+  try {
+    const holidays = await db.holiday.findMany({
+      orderBy: { date: 'asc' }
+    });
+    return {
+      success: true,
+      holidays: holidays.map(h => ({
+        date: h.date.toISOString(),
+        name: h.name
+      }))
+    };
+  } catch (error: any) {
+    console.error('Error fetching holidays:', error);
+    return { success: false, holidays: [] };
+  }
+}
+
+const HOLIDAYS_2026 = [
+  { date: new Date('2026-01-01T00:00:00Z'), name: "วันขึ้นปีใหม่ (New Year's Day)" },
+  { date: new Date('2026-04-06T00:00:00Z'), name: "วันจักรี (Chakri Day)" },
+  { date: new Date('2026-04-13T00:00:00Z'), name: "วันสงกรานต์ (Songkran Day)" },
+  { date: new Date('2026-04-14T00:00:00Z'), name: "วันสงกรานต์ (Songkran Day)" },
+  { date: new Date('2026-05-01T00:00:00Z'), name: "วันแรงงานแห่งชาติ (National Labor Day)" },
+  { date: new Date('2026-05-04T00:00:00Z'), name: "วันฉัตรมงคล (Coronation Day)" },
+  { date: new Date('2026-06-03T00:00:00Z'), name: "วันเฉลิมพระชนมพรรษาสมเด็จพระนางเจ้าสุทิดาฯ (H.M. Queen Suthida's Birthday)" },
+  { date: new Date('2026-07-28T00:00:00Z'), name: "วันเฉลิมพระชนมพรรษาสมเด็จพระเจ้าอยู่หัวฯ (H.M. King Rama 10's Birthday)" },
+  { date: new Date('2026-08-12T00:00:00Z'), name: "วันเฉลิมพระชนมพรรษาสมเด็จพระบรมราชชนนีพันปีหลวง / วันแม่แห่งชาติ (H.M. Queen Sirikit's Birthday / Mother's Day)" },
+  { date: new Date('2026-10-13T00:00:00Z'), name: "วันคล้ายวันสวรรคต ร.9 (King Bhumibol Memorial Day)" },
+  { date: new Date('2026-10-23T00:00:00Z'), name: "วันปิยมหาราช (Chulalongkorn Day)" },
+  { date: new Date('2026-12-07T00:00:00Z'), name: "ชดเชยวันคล้ายวันพระบรมราชสมภพ ร.9 / วันพ่อแห่งชาติ (Substitution for Father's Day)" },
+  { date: new Date('2026-12-31T00:00:00Z'), name: "วันสิ้นปี (New Year's Eve)" }
+];
+
+export async function seedHolidays() {
+  try {
+    const results = [];
+    for (const h of HOLIDAYS_2026) {
+      const res = await db.holiday.upsert({
+        where: { date: h.date },
+        update: { name: h.name },
+        create: { date: h.date, name: h.name }
+      });
+      results.push(res);
+    }
+    return { success: true, count: results.length };
+  } catch (error: any) {
+    console.error('Error seeding holidays:', error);
+    return { success: false, error: error.message };
   }
 }

@@ -64,3 +64,9 @@ model SurveyResponse {
   feedback14_impressions    String?  // สิ่งที่ประทับใจในการฝึกหน้าร้าน
   feedback15_suggestions    String?  // ข้อเสนอแนะอื่นๆ เพื่อการพัฒนาโปรแกรมการฝึกหน้าร้านต่อไป
 }
+
+model Holiday {
+  id    String   @id @default(uuid())
+  date  DateTime @unique
+  name  String
+}
