@@ -582,7 +582,7 @@ export default function SurveyPage() {
                 <div className="section-header">
                   <div className="section-title">ส่วนที่ 3: การประเมินรายสาขา</div>
                   <div className="section-desc">
-                    ประเมินแยกรายสาขาที่เข้าปฏิบัติจริง (เกณฑ์: 4 = ดีเยี่ยม 3 = ดี 2 = พอใช้ 1 = ควรปรับปรุง)
+                    (เกณฑ์การประเมิน: 4 = ดีเยี่ยม 3 = ดี 2 = พอใช้ 1 = ควรปรับปรุง)
                   </div>
                 </div>
 
