@@ -24,7 +24,7 @@ interface FormErrors {
   [key: string]: string;
 }
 
-const DEPARTMENTS = [
+const rawDepartments = [
   'Executive Management',
   'Finance & Accounting',
   'Operations',
@@ -39,6 +39,8 @@ const DEPARTMENTS = [
   'M academy',
   'M C D Property'
 ];
+
+const DEPARTMENTS = [...rawDepartments].sort((a, b) => a.localeCompare(b));
 
 export default function SurveyPage() {
   const [step, setStep] = useState(1);
