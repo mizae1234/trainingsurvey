@@ -573,29 +573,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon yellow">
-              <Star size={22} />
-            </div>
-            <div className="stat-info">
-              <span className="stat-label">ประเมินเฉลี่ย สาขา 1</span>
-              <span className="stat-value" style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                {stats.avgBranch1} <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>/ 4.00</span>
-              </span>
-            </div>
-          </div>
 
-          <div className="stat-card">
-            <div className="stat-icon yellow">
-              <Star size={22} />
-            </div>
-            <div className="stat-info">
-              <span className="stat-label">ประเมินเฉลี่ย สาขา 2</span>
-              <span className="stat-value" style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                {stats.avgBranch2} <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>/ 4.00</span>
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* Charts Section */}
@@ -718,20 +696,20 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
 
               <div className="chart-legend">
                 <div className="legend-item">
-                  <div className="legend-color" style={{ backgroundColor: 'var(--primary-red)' }} />
-                  <span>4: เห็นด้วยอย่างยิ่ง</span>
-                </div>
-                <div className="legend-item">
-                  <div className="legend-color" style={{ backgroundColor: 'var(--primary-yellow)' }} />
-                  <span>3: เห็นด้วย</span>
+                  <div className="legend-color" style={{ backgroundColor: '#FDA4AF' }} />
+                  <span>1: ไม่เห็นด้วยอย่างยิ่ง</span>
                 </div>
                 <div className="legend-item">
                   <div className="legend-color" style={{ backgroundColor: '#F472B6' }} />
                   <span>2: ไม่เห็นด้วย</span>
                 </div>
                 <div className="legend-item">
-                  <div className="legend-color" style={{ backgroundColor: '#FDA4AF' }} />
-                  <span>1: ไม่เห็นด้วยอย่างยิ่ง</span>
+                  <div className="legend-color" style={{ backgroundColor: 'var(--primary-yellow)' }} />
+                  <span>3: เห็นด้วย</span>
+                </div>
+                <div className="legend-item">
+                  <div className="legend-color" style={{ backgroundColor: 'var(--primary-red)' }} />
+                  <span>4: เห็นด้วยอย่างยิ่ง</span>
                 </div>
               </div>
             </div>
@@ -870,17 +848,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
                 />
               </div>
 
-              <select
-                value={suitabilityFilter}
-                onChange={(e) => { setSuitabilityFilter(e.target.value); setCurrentPage(1); }}
-                className="filter-input"
-                style={{ cursor: 'pointer' }}
-              >
-                <option value="all">ความเหมาะสมทั้งหมด</option>
-                <option value="น้อยเกินไป">น้อยเกินไป</option>
-                <option value="มีความเหมาะสม">มีความเหมาะสม</option>
-                <option value="มากเกินไป">มากเกินไป</option>
-              </select>
+
             </div>
 
             <button 
