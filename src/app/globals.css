@@ -474,44 +474,20 @@ input[type="date"].form-input {
   margin-top: 4px;
 }
 
-.rating-box:nth-child(1):hover,
-.rating-box:nth-child(2):hover {
-  border-color: var(--primary-yellow);
-}
-
-.rating-box:nth-child(3):hover,
-.rating-box:nth-child(4):hover {
+.rating-box:hover {
   border-color: var(--primary-red);
 }
 
-/* Ratings 4 and 3 selected highlight (Yellow) */
-.rating-box.selected:nth-child(1),
-.rating-box.selected:nth-child(2) {
-  border-color: var(--primary-yellow);
-  background-color: var(--yellow-tint);
-}
-.rating-box.selected:nth-child(1) .rating-number,
-.rating-box.selected:nth-child(2) .rating-number {
-  color: var(--primary-yellow-hover);
-}
-.rating-box.selected:nth-child(1) .rating-label,
-.rating-box.selected:nth-child(2) .rating-label {
-  color: var(--primary-yellow-hover);
-  font-weight: 500;
-}
-
-/* Ratings 2 and 1 selected highlight (Red) */
-.rating-box.selected:nth-child(3),
-.rating-box.selected:nth-child(4) {
+.rating-box.selected {
   border-color: var(--primary-red);
   background-color: var(--red-tint);
 }
-.rating-box.selected:nth-child(3) .rating-number,
-.rating-box.selected:nth-child(4) .rating-number {
+
+.rating-box.selected .rating-number {
   color: var(--primary-red);
 }
-.rating-box.selected:nth-child(3) .rating-label,
-.rating-box.selected:nth-child(4) .rating-label {
+
+.rating-box.selected .rating-label {
   color: var(--primary-red);
   font-weight: 500;
 }
@@ -581,13 +557,13 @@ input[type="date"].form-input {
 }
 
 .choice-box:hover {
-  border-color: var(--primary-yellow);
+  border-color: var(--primary-red);
 }
 
 .choice-box.selected {
-  border-color: var(--primary-yellow);
-  background-color: var(--yellow-tint);
-  color: var(--primary-yellow-hover);
+  border-color: var(--primary-red);
+  background-color: var(--red-tint);
+  color: var(--primary-red-hover);
   font-weight: 600;
 }
 
