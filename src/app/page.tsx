@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import BranchSelect from '@/components/BranchSelect';
+import SearchableSelect from '@/components/SearchableSelect';
 import DatePicker from '@/components/DatePicker';
 import { submitSurvey } from '@/app/actions';
 import {
@@ -295,25 +296,20 @@ export default function SurveyPage() {
               <div className="step-content">
                 {/* Department Selection */}
                 <div className="form-group" style={{ marginBottom: '24px' }}>
-                  <label className="form-label" style={{ fontWeight: 600, fontSize: '15px' }}>
-                    ฝ่ายงานที่ท่านสังกัด <span>*</span>
-                  </label>
-                  <select
-                    className="form-input"
+                  <SearchableSelect
+                    id="department"
+                    label={<>ฝ่ายงานที่ท่านสังกัด <span>*</span></>}
+                    placeholder="เลือกฝ่ายงานที่ท่านสังกัด..."
+                    options={DEPARTMENTS}
                     value={formData.department}
-                    onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <option value="">-- เลือกฝ่ายงานที่ท่านสังกัด --</option>
-                    {DEPARTMENTS.map((dept) => (
-                      <option key={dept} value={dept}>
-                        {dept}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.department && (
-                    <span className="error-text">{errors.department}</span>
-                  )}
+                    onChange={(val) => {
+                      setFormData(prev => ({ ...prev, department: val }));
+                      if (errors.department) {
+                        setErrors(prev => ({ ...prev, department: '' }));
+                      }
+                    }}
+                    error={errors.department}
+                  />
                 </div>
 
                 <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '24px 0 28px 0' }} />
@@ -332,7 +328,7 @@ export default function SurveyPage() {
                   <div className="form-group">
                     <BranchSelect
                       id="branch1"
-                      label="สาขาที่ 1 ที่เข้าฝึกอบรม"
+                      label={<>สาขาที่ 1 ที่เข้าฝึกอบรม <span>*</span></>}
                       value={formData.branch1}
                       onChange={(val) => setFormData(prev => ({ ...prev, branch1: val }))}
                       error={errors.branch1}
@@ -381,7 +377,7 @@ export default function SurveyPage() {
                   <div className="form-group">
                     <BranchSelect
                       id="branch2"
-                      label="สาขาที่ 2 ที่เข้าฝึกอบรม"
+                      label={<>สาขาที่ 2 ที่เข้าฝึกอบรม <span>*</span></>}
                       value={formData.branch2}
                       onChange={(val) => setFormData(prev => ({ ...prev, branch2: val }))}
                       error={errors.branch2}
