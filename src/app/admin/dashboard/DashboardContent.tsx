@@ -65,6 +65,10 @@ interface DashboardContentProps {
 }
 
 export default function DashboardContent({ initialResponses }: DashboardContentProps) {
+  // CONFIG: ตั้งค่าเป็น false เพื่อปิดการทำงานของปุ่มส่งออก Excel ชั่วคราว (ปุ่มหลอกกดแล้วไม่เกิดอะไรขึ้น)
+  // เปลี่ยนกลับเป็น true เมื่อต้องการให้ปุ่มทำงานส่งออกไฟล์ปกติ
+  const ENABLE_EXPORT = false;
+
   const [responses, setResponses] = useState<ResponseData[]>(initialResponses);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
@@ -382,6 +386,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
 
   // Export directly to Excel (.xlsx) format using SheetJS (xlsx)
   const handleExportExcel = () => {
+    if (!ENABLE_EXPORT) return;
     const headers = [
       'ไอดี', 'วันที่ประเมิน', 'ฝ่ายงานที่ท่านสังกัด', 'สาขาที่ 1', 'วันที่เริ่ม (สาขา 1)', 'วันที่สิ้นสุด (สาขา 1)', 'ระยะเวลา (วัน)',
       'สาขาที่ 2', 'วันที่เริ่ม (สาขา 2)', 'วันที่สิ้นสุด (สาขา 2)', 'ระยะเวลา (วัน)',
@@ -447,6 +452,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
   };
 
   const handleExportBranchExcel = () => {
+    if (!ENABLE_EXPORT) return;
     const headers = [
       'ชื่อสาขา',
       'จำนวนการประเมิน (ครั้ง)',
