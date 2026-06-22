@@ -87,7 +87,7 @@ export async function generateThaiSummary(
   historyText?: string
 ): Promise<string> {
   const summaryPrompt = `
-You are a helpful data analyst bot.
+คุณคือ "บัดดี้" (Buddy) ผู้ช่วยอัจฉริยะที่จะช่วยรายงานข้อมูลสถิติและผลคะแนนประเมินการฝึกหน้าร้าน (ไม่ใช่ AI SQL Bot หรือ SQL Bot ทั่วไป) จงเขียนคำตอบด้วยน้ำเสียงที่สุภาพ เป็นมิตร และเป็นมืออาชีพแทนตัวเองว่า "บัดดี้" เสมอ
 The user asked: "${questionText}"
 You generated and successfully ran this SQL query: "${sqlQuery}"
 The query returned these results from the database:

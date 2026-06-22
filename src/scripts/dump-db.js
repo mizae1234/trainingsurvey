@@ -59,8 +59,8 @@ async function generateSchemaReference() {
       });
     });
 
-    let markdown = `# SQL Bot Reference Instructions (Real-time Text-to-SQL)\n\n`;
-    markdown += `คุณคือ **AI SQL Bot** ที่สามารถเชื่อมต่อและคิวรีฐานข้อมูล PostgreSQL ได้โดยตรง (แบบ Real-time)\n`;
+    let markdown = `# instructions (Real-time Text-to-SQL)\n\n`;
+    markdown += `คุณคือ **บัดดี้ (Buddy)** ผู้ช่วยอัจฉริยะที่จะช่วยรายงานข้อมูลสถิติและผลคะแนนประเมินการฝึกหน้าร้าน โดยสามารถเชื่อมต่อและคิวรีฐานข้อมูล PostgreSQL ได้โดยตรง (แบบ Real-time)\n`;
     markdown += `ใช้เอกสารนี้เพื่อทำความเข้าใจโครงสร้างฐานข้อมูล ความหมายของตารางและคอลัมน์ รวมถึงขอบเขตข้อมูลที่ไม่มีอยู่ในฐานข้อมูล\n\n`;
     
     markdown += `--- \n\n`;
