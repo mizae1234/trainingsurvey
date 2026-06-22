@@ -120,3 +120,135 @@ export async function getUserProfile(
   return null;
 }
 
+/**
+ * Generates a styled LINE Flex Message bubble with action buttons linking to LIFF
+ */
+export function createStatsFlexMessage(todayCount: number, totalCount: number, liffId: string): LineMessage {
+  const todayUri = `https://liff.line.me/${liffId}/admin/dashboard?filter=today`;
+  const allUri = `https://liff.line.me/${liffId}/admin/dashboard`;
+
+  return {
+    type: 'flex',
+    altText: 'รายงานสถิติการฝึกหน้าร้าน 📊',
+    contents: {
+      type: 'bubble',
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        backgroundColor: '#EF4444',
+        paddingAll: '20px',
+        contents: [
+          {
+            type: 'text',
+            text: 'IN-STORE TRAINING SURVEY',
+            color: '#FFFFFF',
+            weight: 'bold',
+            size: 'sm',
+            letterSpacing: '1px'
+          },
+          {
+            type: 'text',
+            text: 'บัดดี้ (Buddy) รายงานผลประเมินรายวัน',
+            color: '#FFEBEB',
+            size: 'xs',
+            margin: 'xs'
+          }
+        ]
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        contents: [
+          {
+            type: 'text',
+            text: 'สรุปรายการประเมินล่าสุด',
+            weight: 'bold',
+            size: 'md',
+            color: '#111827'
+          },
+          {
+            type: 'separator',
+            margin: 'lg'
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'lg',
+            spacing: 'sm',
+            contents: [
+              {
+                type: 'box',
+                layout: 'horizontal',
+                contents: [
+                  {
+                    type: 'text',
+                    text: 'จำนวนประเมินวันนี้:',
+                    size: 'sm',
+                    color: '#4B5563'
+                  },
+                  {
+                    type: 'text',
+                    text: `${todayCount} รายการ`,
+                    size: 'sm',
+                    weight: 'bold',
+                    color: '#EF4444',
+                    align: 'right'
+                  }
+                ]
+              },
+              {
+                type: 'box',
+                layout: 'horizontal',
+                contents: [
+                  {
+                    type: 'text',
+                    text: 'จำนวนประเมินทั้งหมด:',
+                    size: 'sm',
+                    color: '#4B5563'
+                  },
+                  {
+                    type: 'text',
+                    text: `${totalCount} รายการ`,
+                    size: 'sm',
+                    weight: 'bold',
+                    color: '#10B981',
+                    align: 'right'
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      footer: {
+        type: 'box',
+        layout: 'vertical',
+        spacing: 'sm',
+        paddingAll: '20px',
+        contents: [
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#EF4444',
+            action: {
+              type: 'uri',
+              label: 'ดูรายละเอียดวันนี้',
+              uri: todayUri
+            }
+          },
+          {
+            type: 'button',
+            style: 'secondary',
+            action: {
+              type: 'uri',
+              label: 'ดูข้อมูลประเมินทั้งหมด',
+              uri: allUri
+            }
+          }
+        ]
+      }
+    }
+  };
+}
+

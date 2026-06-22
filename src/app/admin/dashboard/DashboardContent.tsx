@@ -99,6 +99,22 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
   const [branchCurrentPage, setBranchCurrentPage] = useState(1);
   const branchItemsPerPage = 10;
 
+  // Initialize date filter from URL query parameter (e.g. ?filter=today)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('filter') === 'today') {
+        const now = new Date();
+        const bkkDateStr = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Asia/Bangkok',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).format(now);
+        setDateFilter(bkkDateStr);
+      }
+    }
+  }, []);
 
   // Filter logic
   const filteredResponses = useMemo(() => {

@@ -7,11 +7,23 @@ import { SurveyResponse } from '@prisma/client';
 // Force dynamic rendering to fetch fresh data on load
 export const dynamic = 'force-dynamic';
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const currentUser = await getCurrentUser();
   
   if (!currentUser) {
-    redirect('/admin/login');
+    const params = await searchParams;
+    const urlParams = new URLSearchParams();
+    for (const [key, val] of Object.entries(params)) {
+      if (typeof val === 'string') {
+        urlParams.append(key, val);
+      }
+    }
+    const queryString = urlParams.toString();
+    redirect(`/admin/login${queryString ? `?${queryString}` : ''}`);
   }
 
   // Fetch all responses ordered by creation date

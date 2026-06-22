@@ -68,7 +68,8 @@ export default function AdminLoginPage() {
       });
 
       if (res.success) {
-        window.location.href = '/admin/dashboard';
+        const queryString = typeof window !== 'undefined' ? window.location.search : '';
+        window.location.href = `/admin/dashboard${queryString}`;
       } else {
         setError(res.error || 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์ผู้ใช้ LINE');
         // Log out of LIFF so they can try again if they were logged in with an unauthorized user
@@ -101,7 +102,8 @@ export default function AdminLoginPage() {
       const result = await adminLogin(password);
       if (result.success) {
         // Force full refresh to clear cookies/layouts
-        window.location.href = '/admin/dashboard';
+        const queryString = typeof window !== 'undefined' ? window.location.search : '';
+        window.location.href = `/admin/dashboard${queryString}`;
       } else {
         setError(result.error || 'รหัสผ่านไม่ถูกต้อง');
       }

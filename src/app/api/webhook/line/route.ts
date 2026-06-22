@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { verifySignature, replyMessage, getGroupName, createTextMessage, getUserProfile } from '@/lib/line';
+import { verifySignature, replyMessage, getGroupName, createTextMessage, getUserProfile, createStatsFlexMessage } from '@/lib/line';
 import { askBotEngine } from '@/lib/bot-engine';
 
 // Helper to save conversation logs
@@ -242,8 +242,32 @@ export async function POST(req: NextRequest) {
       // Call unified bot engine
       const botRes = await askBotEngine(questionText, historyText || undefined);
 
+      let replyPayload: any = createTextMessage(botRes.answer);
+      
+      // Append beautiful Flex Card if it's a successful database statistics query
+      if (botRes.status === 'SUCCESS' && process.env.NEXT_PUBLIC_LIFF_ID) {
+        try {
+          const now = new Date();
+          const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          
+          const todayCount = await db.surveyResponse.count({
+            where: {
+              createdAt: {
+                gte: startOfToday
+              }
+            }
+          });
+          const totalCount = await db.surveyResponse.count();
+          
+          const flexMsg = createStatsFlexMessage(todayCount, totalCount, process.env.NEXT_PUBLIC_LIFF_ID);
+          replyPayload = [replyPayload, flexMsg];
+        } catch (flexErr) {
+          console.error('Error generating Flex Message:', flexErr);
+        }
+      }
+
       // Reply back to LINE
-      await replyMessage(replyToken, createTextMessage(botRes.answer), channelAccessToken);
+      await replyMessage(replyToken, replyPayload, channelAccessToken);
 
       // Save log inside LogChat DB
       await writeChatLog({
