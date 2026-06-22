@@ -141,9 +141,9 @@ export async function askBotEngine(
     };
   }
 
-  // 6. Fallback
+  // 6. Fallback (If Gemini returns a direct conversational response, use it)
   return {
-    answer: 'ขออภัยครับ ผมยังไม่เข้าใจคำถามนี้ หรือหัวข้อนี้ไม่มีข้อมูลรองรับในฐานข้อมูล',
+    answer: cleanResponse,
     status: 'NOT_IN_DB'
   };
 }

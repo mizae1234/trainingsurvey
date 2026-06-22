@@ -162,10 +162,23 @@ export async function POST(req: NextRequest) {
         }
         
         if (source.groupId) {
-          const group = await db.group.findUnique({
+          let group = await db.group.findUnique({
             where: { lineGroupId: source.groupId }
           });
-          groupName = group?.groupName || null;
+          
+          if (!group) {
+            // Auto-register missing group when message is received
+            const fetchedName = await getGroupName(source.groupId, channelAccessToken);
+            group = await db.group.create({
+              data: {
+                lineGroupId: source.groupId,
+                groupName: fetchedName,
+                notificationsEnabled: true
+              }
+            });
+            console.log(`Auto-registered missing group on message: ${fetchedName} (${source.groupId})`);
+          }
+          groupName = group.groupName;
         }
       } catch (dbErr) {
         console.error('Error auto-registering user or fetching names for LogChat:', dbErr);
