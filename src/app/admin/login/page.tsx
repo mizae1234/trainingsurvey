@@ -23,10 +23,14 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const search = window.location.search;
-      if (search && (search.includes('id=') || search.includes('filter='))) {
-        localStorage.setItem('redirect_after_login', search);
-        console.log('Saved redirect query:', search);
+      const searchParams = new URLSearchParams(window.location.search);
+      // Only save if it's not a callback URL from LINE OAuth
+      if (!searchParams.has('code') && !searchParams.has('state')) {
+        const search = window.location.search;
+        if (search && (search.includes('id=') || search.includes('filter='))) {
+          localStorage.setItem('redirect_after_login', search);
+          console.log('Saved redirect query:', search);
+        }
       }
     }
   }, []);
@@ -50,6 +54,13 @@ export default function AdminLoginPage() {
         // Auto login if already logged in via LIFF browser context
         if (window.liff.isLoggedIn()) {
           handleLineAuth();
+        } else {
+          // If we are running inside the LINE app (LIFF client) but not logged in, trigger login automatically
+          if (window.liff.isInClient()) {
+            console.log('Inside LINE app, triggering automatic login...');
+            const redirectUri = window.location.href;
+            window.liff.login({ redirectUri });
+          }
         }
       }
     } catch (err: any) {
@@ -65,7 +76,7 @@ export default function AdminLoginPage() {
 
     try {
       if (!window.liff.isLoggedIn()) {
-        const redirectUri = window.location.origin + '/';
+        const redirectUri = window.location.href;
         window.liff.login({ redirectUri });
         return;
       }
@@ -79,24 +90,34 @@ export default function AdminLoginPage() {
       });
 
       if (res.success) {
-        const queryString = typeof window !== 'undefined' ? window.location.search : '';
+        let targetQuery = '';
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('redirect_after_login');
+          const saved = localStorage.getItem('redirect_after_login');
+          if (saved) {
+            targetQuery = saved;
+            localStorage.removeItem('redirect_after_login');
+          } else {
+            const searchParams = new URLSearchParams(window.location.search);
+            searchParams.delete('code');
+            searchParams.delete('state');
+            searchParams.delete('liffClientId');
+            searchParams.delete('liffRedirectUri');
+            const cleanQuery = searchParams.toString();
+            if (cleanQuery) {
+              targetQuery = `?${cleanQuery}`;
+            }
+          }
         }
-        window.location.href = `/admin/dashboard${queryString}`;
+        window.location.href = `/admin/dashboard${targetQuery}`;
       } else {
         setError(res.error || 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์ผู้ใช้ LINE');
-        // Log out of LIFF so they can try again if they were logged in with an unauthorized user
-        window.liff.logout();
+        // Do not call window.liff.logout() automatically to prevent redirect loops.
+        // The user can refresh the page once the administrator has granted them admin permissions.
       }
     } catch (err: any) {
       console.error('LINE authentication failed:', err);
       setError('เกิดข้อผิดพลาดระหว่างล็อกอินผ่าน LINE: ' + (err.message || err));
-      try {
-        if (window.liff && window.liff.isLoggedIn()) {
-          window.liff.logout();
-        }
-      } catch (e) {}
+      // Do not automatically logout
     } finally {
       setIsLineSubmitting(false);
     }
