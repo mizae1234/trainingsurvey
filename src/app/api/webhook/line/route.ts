@@ -213,6 +213,27 @@ export async function POST(req: NextRequest) {
 
       const geminiModel = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
 
+      const now = new Date();
+      const bkkDateStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Bangkok',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(now);
+      
+      const bkkDayName = new Intl.DateTimeFormat('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        weekday: 'long'
+      }).format(now);
+
+      const bkkTimeStr = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Bangkok',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(now);
+
       // Instruct Gemini to evaluate if the query can be answered, or if it asks for non-existent information
       const analysisPrompt = `
 You are a Text-to-SQL translator and Database analyst.
@@ -220,6 +241,11 @@ Here is the database reference document (containing schema, connection details, 
 ---
 ${sqlBotContext}
 ---
+
+## วันเวลาปัจจุบันของระบบ (สำคัญมากสำหรับใช้คำนวณหรือคิวรีเงื่อนไขเวลา)
+- วันนี้คือ: ${bkkDayName}
+- วันที่ปัจจุบัน (ค.ศ. / AD): ${bkkDateStr}
+- เวลาปัจจุบัน: ${bkkTimeStr}
 
 User Question: "${questionText}"
 
@@ -288,6 +314,10 @@ The user asked: "${questionText}"
 You generated and successfully ran this SQL query: "${cleanResponse}"
 The query returned these results from the database:
 ${JSON.stringify(queryResults, null, 2)}
+
+## ข้อมูลวันเวลาสำหรับการสรุปคำตอบ
+- วันนี้คือ: ${bkkDayName}
+- วันที่: ${bkkDateStr}
 
 Write a polite, concise, and clear summary response in Thai to answer the user's question based on the database results.
 If there are no results, explain it politely. Keep numbers and averages easy to read.
