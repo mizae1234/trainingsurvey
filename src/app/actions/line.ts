@@ -58,14 +58,13 @@ export async function loginWithLine(profile: LineProfile) {
       where: { lineUserId: profile.userId }
     });
 
-    if (!user) {
-      // First admin registered gets SUPER_ADMIN, otherwise USER
-      const adminCount = await db.user.count({
-        where: {
-          OR: [{ role: 'ADMIN' }, { role: 'SUPER_ADMIN' }]
-        }
-      });
+    const adminCount = await db.user.count({
+      where: {
+        OR: [{ role: 'ADMIN' }, { role: 'SUPER_ADMIN' }]
+      }
+    });
 
+    if (!user) {
       user = await db.user.create({
         data: {
           lineUserId: profile.userId,
@@ -75,12 +74,16 @@ export async function loginWithLine(profile: LineProfile) {
         }
       });
     } else {
+      // If there are no ADMIN/SUPER_ADMINs in the system, promote this existing user to SUPER_ADMIN
+      const targetRole = (user.role === 'USER' && adminCount === 0) ? 'SUPER_ADMIN' : user.role;
+
       // Update profile info if changed
       user = await db.user.update({
         where: { id: user.id },
         data: {
           displayName: profile.displayName || user.displayName,
-          pictureUrl: profile.pictureUrl || user.pictureUrl
+          pictureUrl: profile.pictureUrl || user.pictureUrl,
+          role: targetRole
         }
       });
     }

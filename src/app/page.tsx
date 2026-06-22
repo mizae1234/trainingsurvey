@@ -90,6 +90,16 @@ export default function SurveyPage() {
 
   const [holidays, setHolidays] = useState<string[]>([]);
 
+  // Intercept LINE LIFF login redirects and route them to the login page
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('code') || urlParams.has('liffClientId')) {
+        window.location.href = `/admin/login${window.location.search}`;
+      }
+    }
+  }, []);
+
   // Load holidays from DB on mount
   useEffect(() => {
     async function loadHolidays() {
