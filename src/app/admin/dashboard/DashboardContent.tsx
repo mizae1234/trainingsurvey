@@ -541,13 +541,15 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
             <div>ระบบรายงานแบบสอบถาม</div>
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <Link href="/chat" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <MessageSquare size={14} /> ทดสอบแชทบอท
-            </Link>
             {(currentUser.role === 'ADMIN' || currentUser.role === 'SUPER_ADMIN') && (
-              <Link href="/admin/super" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <Settings size={14} /> แผงควบคุมบอท
-              </Link>
+              <>
+                <Link href="/chat" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <MessageSquare size={14} /> ทดสอบแชทบอท
+                </Link>
+                <Link href="/admin/super" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Settings size={14} /> แผงควบคุมบอท
+                </Link>
+              </>
             )}
             <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
               <LogOut size={15} /> ออกจากระบบ

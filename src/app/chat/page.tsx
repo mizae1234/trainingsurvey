@@ -11,6 +11,10 @@ export default async function ChatPage() {
     redirect('/admin/login');
   }
 
+  if (currentUser.role !== 'ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
+    redirect('/admin/dashboard');
+  }
+
   const serializedUser = {
     id: currentUser.id,
     displayName: currentUser.displayName,

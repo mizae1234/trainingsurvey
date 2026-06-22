@@ -24,12 +24,12 @@ export async function getCurrentUser() {
 
     const userId = cookieStore.get('admin_user_id')?.value;
     if (!userId) {
-      // Fallback admin (logged in via password) gets SUPER_ADMIN role
+      // Fallback admin (logged in via password) gets HR_VIEWER role (restricted to survey statistics only)
       return {
         id: 'fallback-admin',
         displayName: 'Fallback Admin',
         pictureUrl: null,
-        role: 'SUPER_ADMIN',
+        role: 'HR_VIEWER',
         lineUserId: 'fallback'
       };
     }
