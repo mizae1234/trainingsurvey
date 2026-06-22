@@ -94,7 +94,7 @@ export default function SurveyPage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('code') || urlParams.has('liffClientId')) {
+      if (urlParams.has('code') || urlParams.has('liffClientId') || urlParams.has('liff.state')) {
         const savedQuery = localStorage.getItem('redirect_after_login') || '';
         
         let redirectUrl = `/admin/login`;
