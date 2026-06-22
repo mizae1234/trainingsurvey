@@ -21,6 +21,16 @@ export default function AdminLoginPage() {
   const [liffError, setLiffError] = useState<string | null>(null);
   const [liffInitialized, setLiffInitialized] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const search = window.location.search;
+      if (search && (search.includes('id=') || search.includes('filter='))) {
+        sessionStorage.setItem('redirect_after_login', search);
+        console.log('Saved redirect query:', search);
+      }
+    }
+  }, []);
+
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
 
   // Initialize LINE LIFF
@@ -55,7 +65,8 @@ export default function AdminLoginPage() {
 
     try {
       if (!window.liff.isLoggedIn()) {
-        window.liff.login({ redirectUri: window.location.href });
+        const redirectUri = window.location.origin + '/';
+        window.liff.login({ redirectUri });
         return;
       }
 
@@ -69,6 +80,9 @@ export default function AdminLoginPage() {
 
       if (res.success) {
         const queryString = typeof window !== 'undefined' ? window.location.search : '';
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('redirect_after_login');
+        }
         window.location.href = `/admin/dashboard${queryString}`;
       } else {
         setError(res.error || 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์ผู้ใช้ LINE');
