@@ -104,7 +104,8 @@ export default function SurveyPage() {
             redirectUrl = `/admin/login${savedQuery}`;
           } else if (savedQuery.startsWith('/')) {
             // Keep in localStorage so the login page can read it, and go to /admin/login
-            redirectUrl = `/admin/login`;
+            // Preserve window.location.search so LINE LIFF callback credentials (code, state) are not lost!
+            redirectUrl = `/admin/login${window.location.search}`;
           }
         } else {
           redirectUrl = `/admin/login${window.location.search}`;

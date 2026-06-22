@@ -91,16 +91,17 @@ export async function loginWithLine(profile: LineProfile) {
     // 2. Validate role
     if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
       const cookieStore = await cookies();
+      const isProd = process.env.NODE_ENV === 'production';
       cookieStore.set(SESSION_COOKIE_NAME, 'authenticated', {
         httpOnly: true,
-        secure: false, // Set to false to support Nginx reverse proxy HTTP forwards
+        secure: isProd, // True in production (HTTPS), false in development (HTTP)
         sameSite: 'lax',
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/'
       });
       cookieStore.set('admin_user_id', user.id, {
         httpOnly: true,
-        secure: false, // Set to false to support Nginx reverse proxy HTTP forwards
+        secure: isProd, // True in production (HTTPS), false in development (HTTP)
         sameSite: 'lax',
         maxAge: 60 * 60 * 24,
         path: '/'

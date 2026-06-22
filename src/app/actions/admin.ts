@@ -9,9 +9,10 @@ export async function adminLogin(password: string) {
 
   if (password === adminPassword) {
     const cookieStore = await cookies();
+    const isProd = process.env.NODE_ENV === 'production';
     cookieStore.set(SESSION_COOKIE_NAME, 'authenticated', {
       httpOnly: true,
-      secure: false, // Set to false to support deployments running over HTTP (no SSL)
+      secure: isProd, // True in production (HTTPS), false in development (HTTP)
       sameSite: 'lax', // Lax is more compatible with external app redirects (e.g. from LINE)
       maxAge: 60 * 60 * 24, // 24 hours
       path: '/'
