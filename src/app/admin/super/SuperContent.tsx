@@ -43,7 +43,8 @@ interface SuperContentProps {
 }
 
 export default function SuperContent({ currentUser }: SuperContentProps) {
-  const [activeTab, setActiveTab] = useState<'groups' | 'users' | 'logchats' | 'tasks'>('groups');
+  const isSuper = currentUser.role === 'SUPER_ADMIN' || currentUser.id === 'fallback-admin';
+  const [activeTab, setActiveTab] = useState<'groups' | 'users' | 'logchats' | 'tasks'>(isSuper ? 'groups' : 'tasks');
   
   // States
   const [lineUsers, setLineUsers] = useState<any[]>([]);
@@ -249,8 +250,8 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
         <div className="admin-nav-container">
           <div className="admin-brand">
             <Settings size={20} />
-            <span>Super Admin Panel</span>
-            <div style={{ color: 'var(--primary-red)' }}>บอท & การตั้งค่าระบบ</div>
+            <span>{isSuper ? 'Super Admin Panel' : 'Admin Control Panel'}</span>
+            <div style={{ color: 'var(--primary-red)' }}>{isSuper ? 'บอท & การตั้งค่าระบบ' : 'บอท & งานมอบหมาย'}</div>
           </div>
           
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -287,25 +288,29 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
 
         {/* Tab Selection */}
         <div className="admin-tabs">
-          <button 
-            onClick={() => setActiveTab('groups')} 
-            className={`admin-tab-btn ${activeTab === 'groups' ? 'active' : ''}`}
-          >
-            กลุ่มไลน์บอท ({lineGroups.length})
-          </button>
-          <button 
-            onClick={() => setActiveTab('users')} 
-            className={`admin-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
-          >
-            ตั้งค่าสิทธิ์ผู้ใช้งาน ({lineUsers.length})
-          </button>
+          {isSuper && (
+            <>
+              <button 
+                onClick={() => setActiveTab('groups')} 
+                className={`admin-tab-btn ${activeTab === 'groups' ? 'active' : ''}`}
+              >
+                กลุ่มไลน์บอท ({lineGroups.length})
+              </button>
+              <button 
+                onClick={() => setActiveTab('users')} 
+                className={`admin-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+              >
+                ตั้งค่าสิทธิ์ผู้ใช้งาน ({lineUsers.length})
+              </button>
+            </>
+          )}
           <button 
             onClick={() => setActiveTab('tasks')} 
             className={`admin-tab-btn ${activeTab === 'tasks' ? 'active' : ''}`}
           >
             งานมอบหมาย (Buddy Tasks) ({buddyTasks.length})
           </button>
-          {(currentUser.role === 'SUPER_ADMIN' || currentUser.id === 'fallback-admin') && (
+          {isSuper && (
             <button 
               onClick={() => setActiveTab('logchats')} 
               className={`admin-tab-btn ${activeTab === 'logchats' ? 'active' : ''}`}
@@ -316,7 +321,7 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
         </div>
 
         {/* Groups management */}
-        {activeTab === 'groups' && (
+        {activeTab === 'groups' && isSuper && (
           <div className="dashboard-card" style={{ padding: '24px' }}>
             <div style={{ marginBottom: '20px' }}>
               <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>รายชื่อกลุ่มไลน์ (LINE Groups) ที่เชิญบอทเข้า</h2>
@@ -394,7 +399,7 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
         )}
 
         {/* Users management */}
-        {activeTab === 'users' && (
+        {activeTab === 'users' && isSuper && (
           <div className="dashboard-card" style={{ padding: '24px' }}>
             <div style={{ marginBottom: '20px' }}>
               <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>รายชื่อผู้ใช้งาน LINE Login ที่ลงทะเบียนสิทธิ์</h2>

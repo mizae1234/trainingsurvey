@@ -184,11 +184,13 @@ export async function getLineGroups() {
   }
 }
 
-/**
- * Toggle notifications on/off for a group
- */
 export async function toggleGroupNotifications(groupId: string, enabled: boolean) {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'SUPER_ADMIN') {
+      return { success: false, error: 'คุณไม่มีสิทธิ์แก้ไขการแจ้งเตือนของกลุ่ม (ต้องการสิทธิ์ Super Admin)' };
+    }
+
     await db.group.update({
       where: { id: groupId },
       data: { notificationsEnabled: enabled }
