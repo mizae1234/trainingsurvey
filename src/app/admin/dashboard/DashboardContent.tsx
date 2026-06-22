@@ -67,7 +67,7 @@ interface DashboardContentProps {
 export default function DashboardContent({ initialResponses }: DashboardContentProps) {
   // CONFIG: ตั้งค่าเป็น false เพื่อปิดการทำงานของปุ่มส่งออก Excel ชั่วคราว (ปุ่มหลอกกดแล้วไม่เกิดอะไรขึ้น)
   // เปลี่ยนกลับเป็น true เมื่อต้องการให้ปุ่มทำงานส่งออกไฟล์ปกติ
-  const ENABLE_EXPORT = false;
+  const ENABLE_EXPORT = true;
 
   const [responses, setResponses] = useState<ResponseData[]>(initialResponses);
   const [searchTerm, setSearchTerm] = useState('');
