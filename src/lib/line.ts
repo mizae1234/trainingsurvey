@@ -232,15 +232,6 @@ export function createStatsFlexMessage(todayCount: number, totalCount: number, l
             color: '#EF4444',
             action: {
               type: 'uri',
-              label: 'ดูรายละเอียดวันนี้',
-              uri: todayUri
-            }
-          },
-          {
-            type: 'button',
-            style: 'secondary',
-            action: {
-              type: 'uri',
               label: 'ดูข้อมูลประเมินทั้งหมด',
               uri: allUri
             }

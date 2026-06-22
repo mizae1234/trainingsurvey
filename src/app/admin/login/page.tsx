@@ -20,8 +20,9 @@ function getRedirectPath(searchString: string): string | null {
   if (liffState) {
     try {
       const decoded = decodeURIComponent(liffState);
-      if (decoded.startsWith('/admin')) {
-        return decoded;
+      const adminIndex = decoded.indexOf('/admin');
+      if (adminIndex !== -1) {
+        return decoded.substring(adminIndex);
       }
     } catch (e) {}
   }
@@ -31,8 +32,9 @@ function getRedirectPath(searchString: string): string | null {
   if (liffRedirectUri) {
     try {
       const url = new URL(liffRedirectUri);
-      if (url.pathname.startsWith('/admin')) {
-        return url.pathname + url.search;
+      const adminIndex = url.pathname.indexOf('/admin');
+      if (adminIndex !== -1) {
+        return url.pathname.substring(adminIndex) + url.search;
       }
     } catch (e) {}
   }
