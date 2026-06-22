@@ -77,6 +77,11 @@ export default function AdminLoginPage() {
     } catch (err: any) {
       console.error('LINE authentication failed:', err);
       setError('เกิดข้อผิดพลาดระหว่างล็อกอินผ่าน LINE: ' + (err.message || err));
+      try {
+        if (window.liff && window.liff.isLoggedIn()) {
+          window.liff.logout();
+        }
+      } catch (e) {}
     } finally {
       setIsLineSubmitting(false);
     }
