@@ -192,7 +192,7 @@ export function createStatsFlexMessage(todayCount: number, totalCount: number, l
                     size: 'sm',
                     weight: 'bold',
                     color: '#EF4444',
-                    align: 'right'
+                    align: 'end'
                   }
                 ]
               },
@@ -212,7 +212,7 @@ export function createStatsFlexMessage(todayCount: number, totalCount: number, l
                     size: 'sm',
                     weight: 'bold',
                     color: '#10B981',
-                    align: 'right'
+                    align: 'end'
                   }
                 ]
               }
@@ -328,7 +328,7 @@ export function createTaskFlexMessage(task: {
                     size: 'sm',
                     weight: 'bold',
                     color: '#10B981',
-                    align: 'right',
+                    align: 'end',
                     flex: 3
                   }
                 ]
@@ -349,7 +349,7 @@ export function createTaskFlexMessage(task: {
                     text: task.displayName || 'ไม่ได้ระบุ',
                     size: 'sm',
                     color: '#111827',
-                    align: 'right',
+                    align: 'end',
                     flex: 3
                   }
                 ]

@@ -218,9 +218,9 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
-      // Check if it matches "note : <content>" (case insensitive)
-      const noteMatch = questionText.match(/^note\s*:\s*(.*)$/i);
-      if (noteMatch) {
+      // Check if it matches "note <content>" or "note : <content>" (case insensitive)
+      const noteMatch = questionText.match(/^note\s*:?\s*(.*)$/i);
+      if (noteMatch && noteMatch[1].trim()) {
         const noteContent = noteMatch[1].trim();
         
         // Extract assignee (e.g. @name)
