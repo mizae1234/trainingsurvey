@@ -143,8 +143,7 @@ export function createStatsFlexMessage(todayCount: number, totalCount: number, l
             text: 'IN-STORE TRAINING SURVEY',
             color: '#FFFFFF',
             weight: 'bold',
-            size: 'sm',
-            letterSpacing: '1px'
+            size: 'sm'
           },
           {
             type: 'text',
@@ -279,8 +278,7 @@ export function createTaskFlexMessage(task: {
             text: 'TASK ASSIGNED',
             color: '#FFFFFF',
             weight: 'bold',
-            size: 'sm',
-            letterSpacing: '1px'
+            size: 'sm'
           },
           {
             type: 'text',
