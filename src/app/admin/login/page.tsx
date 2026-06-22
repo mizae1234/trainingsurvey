@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
     if (typeof window !== 'undefined') {
       const search = window.location.search;
       if (search && (search.includes('id=') || search.includes('filter='))) {
-        sessionStorage.setItem('redirect_after_login', search);
+        localStorage.setItem('redirect_after_login', search);
         console.log('Saved redirect query:', search);
       }
     }
@@ -81,7 +81,7 @@ export default function AdminLoginPage() {
       if (res.success) {
         const queryString = typeof window !== 'undefined' ? window.location.search : '';
         if (typeof window !== 'undefined') {
-          sessionStorage.removeItem('redirect_after_login');
+          localStorage.removeItem('redirect_after_login');
         }
         window.location.href = `/admin/dashboard${queryString}`;
       } else {
