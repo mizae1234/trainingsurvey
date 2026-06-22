@@ -65,7 +65,7 @@ export async function loginWithLine(profile: LineProfile) {
           lineUserId: profile.userId,
           displayName: profile.displayName || 'LINE User',
           pictureUrl: profile.pictureUrl || null,
-          role: 'USER'
+          role: 'ADMIN' // Default new web login users to ADMIN
         }
       });
     } else {
@@ -77,6 +77,15 @@ export async function loginWithLine(profile: LineProfile) {
           pictureUrl: profile.pictureUrl || user.pictureUrl
         }
       });
+    }
+
+    // Promote existing USER to ADMIN to grant instant access for web logins
+    if (user.role === 'USER') {
+      user = await db.user.update({
+        where: { id: user.id },
+        data: { role: 'ADMIN' }
+      });
+      console.log(`Promoted user ${user.displayName} to ADMIN on web login.`);
     }
 
     // 2. Validate role
