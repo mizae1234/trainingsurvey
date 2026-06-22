@@ -84,14 +84,14 @@ export async function loginWithLine(profile: LineProfile) {
       const cookieStore = await cookies();
       cookieStore.set(SESSION_COOKIE_NAME, 'authenticated', {
         httpOnly: true,
-        secure: true, // HTTPS set up successfully!
+        secure: false, // Set to false to support Nginx reverse proxy HTTP forwards
         sameSite: 'lax',
         maxAge: 60 * 60 * 24, // 24 hours
         path: '/'
       });
       cookieStore.set('admin_user_id', user.id, {
         httpOnly: true,
-        secure: true,
+        secure: false, // Set to false to support Nginx reverse proxy HTTP forwards
         sameSite: 'lax',
         maxAge: 60 * 60 * 24,
         path: '/'
