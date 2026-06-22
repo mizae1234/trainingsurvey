@@ -70,3 +70,23 @@ model Holiday {
   date  DateTime @unique
   name  String
 }
+
+model User {
+  id          String   @id @default(uuid())
+  lineUserId  String   @unique
+  displayName String
+  pictureUrl  String?
+  role        String   @default("USER") // "USER", "ADMIN"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Group {
+  id                   String   @id @default(uuid())
+  lineGroupId          String   @unique
+  groupName            String   @default("กลุ่มไลน์ (LINE Group)")
+  notificationsEnabled Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
