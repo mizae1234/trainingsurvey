@@ -373,7 +373,7 @@ export function createTaskFlexMessage(task: {
                     color: '#111827',
                     wrap: true,
                     margin: 'xs',
-                    weight: 'medium'
+                    weight: 'bold'
                   }
                 ]
               }
