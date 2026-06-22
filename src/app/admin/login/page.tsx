@@ -12,6 +12,44 @@ declare global {
   }
 }
 
+function getRedirectPath(searchString: string): string | null {
+  const params = new URLSearchParams(searchString);
+  
+  // 1. Try liff.state
+  const liffState = params.get('liff.state');
+  if (liffState) {
+    try {
+      const decoded = decodeURIComponent(liffState);
+      if (decoded.startsWith('/admin')) {
+        return decoded;
+      }
+    } catch (e) {}
+  }
+  
+  // 2. Try liffRedirectUri
+  const liffRedirectUri = params.get('liffRedirectUri');
+  if (liffRedirectUri) {
+    try {
+      const url = new URL(liffRedirectUri);
+      if (url.pathname.startsWith('/admin')) {
+        return url.pathname + url.search;
+      }
+    } catch (e) {}
+  }
+  
+  // 3. Try standard query params like id or filter
+  const id = params.get('id');
+  if (id) {
+    return `/admin/tasks?id=${id}`;
+  }
+  const filter = params.get('filter');
+  if (filter) {
+    return `/admin/dashboard?filter=${filter}`;
+  }
+  
+  return null;
+}
+
 export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -26,10 +64,10 @@ export default function AdminLoginPage() {
       const searchParams = new URLSearchParams(window.location.search);
       // Only save if it's not a callback URL from LINE OAuth
       if (!searchParams.has('code') && !searchParams.has('state')) {
-        const search = window.location.search;
-        if (search && (search.includes('id=') || search.includes('filter='))) {
-          localStorage.setItem('redirect_after_login', search);
-          console.log('Saved redirect query:', search);
+        const redirectPath = getRedirectPath(window.location.search);
+        if (redirectPath) {
+          localStorage.setItem('redirect_after_login', redirectPath);
+          console.log('Saved redirect path:', redirectPath);
         }
       }
     }
@@ -90,25 +128,25 @@ export default function AdminLoginPage() {
       });
 
       if (res.success) {
-        let targetQuery = '';
+        let redirectUrl = '/admin/dashboard';
         if (typeof window !== 'undefined') {
-          const saved = localStorage.getItem('redirect_after_login');
-          if (saved) {
-            targetQuery = saved;
+          const savedPath = localStorage.getItem('redirect_after_login');
+          if (savedPath) {
+            redirectUrl = savedPath;
             localStorage.removeItem('redirect_after_login');
           } else {
-            const searchParams = new URLSearchParams(window.location.search);
-            searchParams.delete('code');
-            searchParams.delete('state');
-            searchParams.delete('liffClientId');
-            searchParams.delete('liffRedirectUri');
-            const cleanQuery = searchParams.toString();
-            if (cleanQuery) {
-              targetQuery = `?${cleanQuery}`;
+            const currentPath = getRedirectPath(window.location.search);
+            if (currentPath) {
+              redirectUrl = currentPath;
             }
           }
         }
-        window.location.href = `/admin/dashboard${targetQuery}`;
+        if (redirectUrl.startsWith('?')) {
+          redirectUrl = `/admin/dashboard${redirectUrl}`;
+        } else if (!redirectUrl.startsWith('/')) {
+          redirectUrl = '/admin/dashboard';
+        }
+        window.location.href = redirectUrl;
       } else {
         setError(res.error || 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์ผู้ใช้ LINE');
         // Do not call window.liff.logout() automatically to prevent redirect loops.
@@ -137,8 +175,25 @@ export default function AdminLoginPage() {
       const result = await adminLogin(password);
       if (result.success) {
         // Force full refresh to clear cookies/layouts
-        const queryString = typeof window !== 'undefined' ? window.location.search : '';
-        window.location.href = `/admin/dashboard${queryString}`;
+        let redirectUrl = '/admin/dashboard';
+        if (typeof window !== 'undefined') {
+          const savedPath = localStorage.getItem('redirect_after_login');
+          if (savedPath) {
+            redirectUrl = savedPath;
+            localStorage.removeItem('redirect_after_login');
+          } else {
+            const currentPath = getRedirectPath(window.location.search);
+            if (currentPath) {
+              redirectUrl = currentPath;
+            }
+          }
+        }
+        if (redirectUrl.startsWith('?')) {
+          redirectUrl = `/admin/dashboard${redirectUrl}`;
+        } else if (!redirectUrl.startsWith('/')) {
+          redirectUrl = '/admin/dashboard';
+        }
+        window.location.href = redirectUrl;
       } else {
         setError(result.error || 'รหัสผ่านไม่ถูกต้อง');
       }

@@ -96,8 +96,21 @@ export default function SurveyPage() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('code') || urlParams.has('liffClientId')) {
         const savedQuery = localStorage.getItem('redirect_after_login') || '';
-        localStorage.removeItem('redirect_after_login');
-        window.location.href = `/admin/login${savedQuery ? savedQuery : window.location.search}`;
+        
+        let redirectUrl = `/admin/login`;
+        if (savedQuery) {
+          if (savedQuery.startsWith('?')) {
+            localStorage.removeItem('redirect_after_login');
+            redirectUrl = `/admin/login${savedQuery}`;
+          } else if (savedQuery.startsWith('/')) {
+            // Keep in localStorage so the login page can read it, and go to /admin/login
+            redirectUrl = `/admin/login`;
+          }
+        } else {
+          redirectUrl = `/admin/login${window.location.search}`;
+        }
+        
+        window.location.href = redirectUrl;
       }
     }
   }, []);

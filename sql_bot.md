@@ -40,6 +40,20 @@
 
 ## 3. โครงสร้างตาราง (Database Schema Structure)
 
+### ตาราง: `"BuddyTask"`
+
+| Column Name | Data Type | Nullable |
+| --- | --- | --- |
+| `id` | `integer` | `NO` |
+| `createdAt` | `timestamp without time zone` | `NO` |
+| `lineUserId` | `text` | `NO` |
+| `displayName` | `text` | `YES` |
+| `lineGroupId` | `text` | `YES` |
+| `groupName` | `text` | `YES` |
+| `assignee` | `text` | `YES` |
+| `description` | `text` | `NO` |
+| `status` | `text` | `NO` |
+
 ### ตาราง: `"Group"`
 
 | Column Name | Data Type | Nullable |

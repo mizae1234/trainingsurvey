@@ -301,24 +301,29 @@ export async function POST(req: NextRequest) {
       let replyPayload: any = createTextMessage(botRes.answer);
       
       // Append beautiful Flex Card if it's a successful database statistics query
+      // Append beautiful Flex Card if it's a successful database query and user specifically asks for counts/dashboard/reports/links
       if (botRes.status === 'SUCCESS' && process.env.NEXT_PUBLIC_LIFF_ID) {
-        try {
-          const now = new Date();
-          const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          
-          const todayCount = await db.surveyResponse.count({
-            where: {
-              createdAt: {
-                gte: startOfToday
+        const isStatsRequest = /แดชบอร์ด|dashboard|รายงาน|สถิติ|จำนวน.*ประเมิน|ประเมิน.*กี่|ยอดประเมิน|ลิงก์|link|ภาพรวม/i.test(questionText) && 
+                               !/คะแนน|เฉลี่ย|พึงพอใจ|ความใส่ใจ|พี่เลี้ยง|ข้อเสนอแนะ/i.test(questionText);
+        if (isStatsRequest) {
+          try {
+            const now = new Date();
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            const todayCount = await db.surveyResponse.count({
+              where: {
+                createdAt: {
+                  gte: startOfToday
+                }
               }
-            }
-          });
-          const totalCount = await db.surveyResponse.count();
-          
-          const flexMsg = createStatsFlexMessage(todayCount, totalCount, process.env.NEXT_PUBLIC_LIFF_ID);
-          replyPayload = [replyPayload, flexMsg];
-        } catch (flexErr) {
-          console.error('Error generating Flex Message:', flexErr);
+            });
+            const totalCount = await db.surveyResponse.count();
+            
+            const flexMsg = createStatsFlexMessage(todayCount, totalCount, process.env.NEXT_PUBLIC_LIFF_ID);
+            replyPayload = [replyPayload, flexMsg];
+          } catch (flexErr) {
+            console.error('Error generating Flex Message:', flexErr);
+          }
         }
       }
 
