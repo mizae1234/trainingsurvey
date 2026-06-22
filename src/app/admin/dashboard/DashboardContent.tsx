@@ -1,14 +1,9 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { adminLogout } from '@/app/actions/admin';
 import * as XLSX from 'xlsx';
-import { 
-  getLineUsers, 
-  updateUserRole, 
-  getLineGroups, 
-  toggleGroupNotifications 
-} from '@/app/actions/line';
+import Link from 'next/link';
 import { 
   BarChart, 
   Download, 
@@ -26,7 +21,9 @@ import {
   CheckCircle,
   HelpCircle,
   Award,
-  AlertTriangle
+  AlertTriangle,
+  MessageSquare,
+  Settings
 } from 'lucide-react';
 
 interface ResponseData {
@@ -66,11 +63,20 @@ interface ResponseData {
   feedback15_suggestions: string | null;
 }
 
-interface DashboardContentProps {
-  initialResponses: ResponseData[];
+interface UserData {
+  id: string;
+  displayName: string;
+  role: string;
+  pictureUrl: string | null;
+  lineUserId: string;
 }
 
-export default function DashboardContent({ initialResponses }: DashboardContentProps) {
+interface DashboardContentProps {
+  initialResponses: ResponseData[];
+  currentUser: UserData;
+}
+
+export default function DashboardContent({ initialResponses, currentUser }: DashboardContentProps) {
   // CONFIG: ตั้งค่าเป็น false เพื่อปิดการทำงานของปุ่มส่งออก Excel ชั่วคราว (ปุ่มหลอกกดแล้วไม่เกิดอะไรขึ้น)
   // เปลี่ยนกลับเป็น true เมื่อต้องการให้ปุ่มทำงานส่งออกไฟล์ปกติ
   const ENABLE_EXPORT = true;
@@ -86,76 +92,8 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
   const itemsPerPage = 10;
 
   // Tabs and branch view states
-  const [activeTab, setActiveTab] = useState<'overview' | 'branches' | 'line'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'branches'>('overview');
   const [branchSearchTerm, setBranchSearchTerm] = useState('');
-  
-  // LINE Settings States
-  const [lineUsers, setLineUsers] = useState<any[]>([]);
-  const [lineGroups, setLineGroups] = useState<any[]>([]);
-  const [isLoadingLine, setIsLoadingLine] = useState(false);
-  const [lineError, setLineError] = useState<string | null>(null);
-  const [lineSuccessMsg, setLineSuccessMsg] = useState<string | null>(null);
-
-  const fetchLineData = async () => {
-    setIsLoadingLine(true);
-    setLineError(null);
-    try {
-      const [usersRes, groupsRes] = await Promise.all([
-        getLineUsers(),
-        getLineGroups()
-      ]);
-      if (usersRes.success) {
-        setLineUsers(usersRes.users || []);
-      } else {
-        setLineError(usersRes.error || 'Failed to load LINE users');
-      }
-      if (groupsRes.success) {
-        setLineGroups(groupsRes.groups || []);
-      } else {
-        setLineError(prev => prev || groupsRes.error || 'Failed to load LINE groups');
-      }
-    } catch (err: any) {
-      setLineError('Failed to load LINE settings data: ' + err.message);
-    } finally {
-      setIsLoadingLine(false);
-    }
-  };
-
-  useEffect(() => {
-    if (activeTab === 'line') {
-      fetchLineData();
-    }
-  }, [activeTab]);
-
-  const handleRoleChange = async (userId: string, newRole: string) => {
-    try {
-      const res = await updateUserRole(userId, newRole);
-      if (res.success) {
-        setLineSuccessMsg('อัปเดตสิทธิ์ผู้ใช้สำเร็จ');
-        setLineUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-        setTimeout(() => setLineSuccessMsg(null), 3000);
-      } else {
-        setLineError(res.error || 'ไม่สามารถแก้ไขสิทธิ์ได้');
-      }
-    } catch (err: any) {
-      setLineError(err.message || 'Error updating role');
-    }
-  };
-
-  const handleGroupToggle = async (groupId: string, enabled: boolean) => {
-    try {
-      const res = await toggleGroupNotifications(groupId, enabled);
-      if (res.success) {
-        setLineSuccessMsg('อัปเดตการตั้งค่าการแจ้งเตือนกลุ่มสำเร็จ');
-        setLineGroups(prev => prev.map(g => g.id === groupId ? { ...g, notificationsEnabled: enabled } : g));
-        setTimeout(() => setLineSuccessMsg(null), 3000);
-      } else {
-        setLineError(res.error || 'ไม่สามารถแก้ไขการแจ้งเตือนได้');
-      }
-    } catch (err: any) {
-      setLineError(err.message || 'Error updating notifications');
-    }
-  };
   const [branchSortKey, setBranchSortKey] = useState<'name' | 'count' | 'average'>('average');
   const [branchSortOrder, setBranchSortOrder] = useState<'asc' | 'desc'>('desc');
   const [branchCurrentPage, setBranchCurrentPage] = useState(1);
@@ -602,9 +540,19 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
             <span>HRD Admin Portal</span>
             <div>ระบบรายงานแบบสอบถาม</div>
           </div>
-          <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <LogOut size={15} /> ออกจากระบบ
-          </button>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <Link href="/chat" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <MessageSquare size={14} /> ทดสอบแชทบอท
+            </Link>
+            {(currentUser.role === 'ADMIN' || currentUser.role === 'SUPER_ADMIN') && (
+              <Link href="/admin/super" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <Settings size={14} /> แผงควบคุมบอท
+              </Link>
+            )}
+            <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <LogOut size={15} /> ออกจากระบบ
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -624,12 +572,6 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
             className={`admin-tab-btn ${activeTab === 'branches' ? 'active' : ''}`}
           >
             ประสิทธิภาพแยกรายสาขา ({branchSummaryStats.totalDistinctBranches})
-          </button>
-          <button 
-            onClick={() => { setActiveTab('line'); }} 
-            className={`admin-tab-btn ${activeTab === 'line' ? 'active' : ''}`}
-          >
-            จัดการ LINE OA & สิทธิ์ผู้ใช้งาน
           </button>
         </div>
 
@@ -1532,151 +1474,7 @@ export default function DashboardContent({ initialResponses }: DashboardContentP
         </div>
       )}
 
-      {/* LINE Settings tab view rendering */}
-      {activeTab === 'line' && (
-        <div className="dashboard-card" style={{ padding: '24px' }}>
-          <div style={{ paddingBottom: '16px', borderBottom: '1px solid var(--border-color)', marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>การตั้งค่าระบบ LINE OA & สิทธิ์การใช้งาน</h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-              จัดการสิทธิ์การเข้าถึงหน้าแอดมินสำหรับผู้ใช้ LINE และเปิด/ปิดระบบแจ้งเตือนไปยังกลุ่ม LINE แต่ละกลุ่ม
-            </p>
-          </div>
 
-          {lineSuccessMsg && (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: '#E8F5E9', color: '#2E7D32', padding: '12px', borderRadius: 'var(--radius-sm)', marginBottom: '20px', fontSize: '13px', border: '1px solid #C8E6C9' }}>
-              <CheckCircle size={16} />
-              <span>{lineSuccessMsg}</span>
-            </div>
-          )}
-
-          {lineError && (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: 'var(--red-tint)', color: 'var(--primary-red)', padding: '12px', borderRadius: 'var(--radius-sm)', marginBottom: '20px', fontSize: '13px', border: '1px solid #FECDD3' }}>
-              <AlertTriangle size={16} />
-              <span>{lineError}</span>
-            </div>
-          )}
-
-          {isLoadingLine ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-              กำลังโหลดข้อมูลระบบ LINE...
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              {/* 1. LINE Groups Table */}
-              <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Users size={18} />
-                  <span>กลุ่มไลน์ที่บอทเข้าร่วม (LINE Groups)</span>
-                </h3>
-                <div className="table-responsive" style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
-                  <table className="data-table" style={{ fontSize: '13px' }}>
-                    <thead>
-                      <tr>
-                        <th>ชื่อกลุ่ม</th>
-                        <th>LINE Group ID</th>
-                        <th style={{ textAlign: 'center' }}>ส่งการแจ้งเตือน</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {lineGroups.length > 0 ? (
-                        lineGroups.map(group => (
-                          <tr key={group.id}>
-                            <td style={{ fontWeight: 600 }}>{group.groupName}</td>
-                            <td style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>{group.lineGroupId}</td>
-                            <td style={{ textAlign: 'center' }}>
-                              <button
-                                type="button"
-                                onClick={() => handleGroupToggle(group.id, !group.notificationsEnabled)}
-                                className={`btn ${group.notificationsEnabled ? 'btn-primary' : 'btn-secondary'}`}
-                                style={{ 
-                                  padding: '6px 12px', 
-                                  fontSize: '11px',
-                                  backgroundColor: group.notificationsEnabled ? 'var(--primary-green)' : '#94A3B8',
-                                  border: 'none',
-                                  color: 'white',
-                                  minWidth: '90px'
-                                }}
-                              >
-                                {group.notificationsEnabled ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={3} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
-                            ยังไม่มีกลุ่มไลน์ที่บอทเข้าร่วม (เชิญบอทเข้ากลุ่มไลน์เพื่อบันทึกข้อมูล)
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* 2. LINE Users Table */}
-              <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Sliders size={18} />
-                  <span>สิทธิ์ผู้ใช้ LINE Login (LINE Users Auth)</span>
-                </h3>
-                <div className="table-responsive" style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
-                  <table className="data-table" style={{ fontSize: '13px' }}>
-                    <thead>
-                      <tr>
-                        <th style={{ width: '60px' }}>รูปภาพ</th>
-                        <th>ชื่อผู้ใช้ LINE</th>
-                        <th>LINE User ID</th>
-                        <th style={{ textAlign: 'center', width: '150px' }}>สิทธิ์เข้าใช้งาน</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {lineUsers.length > 0 ? (
-                        lineUsers.map(user => (
-                          <tr key={user.id}>
-                            <td>
-                              {user.pictureUrl ? (
-                                <img 
-                                  src={user.pictureUrl} 
-                                  alt={user.displayName} 
-                                  style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
-                                />
-                              ) : (
-                                <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#64748B' }}>
-                                  LINE
-                                </div>
-                              )}
-                            </td>
-                            <td style={{ fontWeight: 600 }}>{user.displayName}</td>
-                            <td style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>{user.lineUserId}</td>
-                            <td style={{ textAlign: 'center' }}>
-                              <select
-                                value={user.role}
-                                onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                                className="form-input"
-                                style={{ padding: '4px 8px', fontSize: '12px', height: 'auto', width: '100%', maxWidth: '120px', margin: '0 auto' }}
-                              >
-                                <option value="USER">USER</option>
-                                <option value="ADMIN">ADMIN</option>
-                              </select>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
-                            ยังไม่มีผู้ใช้งาน LINE ทำการล็อกอินเข้าระบบ (ล็อกอินครั้งแรกผ่าน LINE เพื่อบันทึกชื่อ)
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
     </div>
   );

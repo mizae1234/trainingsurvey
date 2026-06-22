@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { checkAdminAuth } from '@/app/actions/admin';
+import { getCurrentUser } from '@/app/actions/line';
 import db from '@/lib/db';
 import DashboardContent from './DashboardContent';
 import { SurveyResponse } from '@prisma/client';
@@ -8,9 +8,9 @@ import { SurveyResponse } from '@prisma/client';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboardPage() {
-  const isAuthenticated = await checkAdminAuth();
+  const currentUser = await getCurrentUser();
   
-  if (!isAuthenticated) {
+  if (!currentUser) {
     redirect('/admin/login');
   }
 
@@ -36,5 +36,13 @@ export default async function AdminDashboardPage() {
     branch2TrainingEnd: response.branch2TrainingEnd.toISOString(),
   }));
 
-  return <DashboardContent initialResponses={serializedResponses} />;
+  const serializedUser = {
+    id: currentUser.id,
+    displayName: currentUser.displayName,
+    role: currentUser.role,
+    pictureUrl: currentUser.pictureUrl || null,
+    lineUserId: currentUser.lineUserId
+  };
+
+  return <DashboardContent initialResponses={serializedResponses} currentUser={serializedUser} />;
 }

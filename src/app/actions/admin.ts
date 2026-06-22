@@ -16,6 +16,8 @@ export async function adminLogin(password: string) {
       maxAge: 60 * 60 * 24, // 24 hours
       path: '/'
     });
+    // Clear admin_user_id since this is the passcode fallback login
+    cookieStore.delete('admin_user_id');
     return { success: true };
   }
 
@@ -25,6 +27,7 @@ export async function adminLogin(password: string) {
 export async function adminLogout() {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);
+  cookieStore.delete('admin_user_id');
   return { success: true };
 }
 
