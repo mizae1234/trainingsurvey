@@ -62,9 +62,9 @@ async function getGroupName(groupId: string, channelAccessToken: string): Promis
 }
 
 // Helper to ask Gemini to generate SQL or direct response
-async function queryGemini(prompt: string, apiKey: string): Promise<string> {
+async function queryGemini(prompt: string, apiKey: string, model: string): Promise<string> {
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -82,7 +82,7 @@ async function queryGemini(prompt: string, apiKey: string): Promise<string> {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error('Gemini API Error:', errText);
+      console.error(`Gemini API Error using model ${model}:`, errText);
       return '';
     }
 
@@ -160,8 +160,40 @@ export async function POST(req: NextRequest) {
     if (event.type === 'message' && event.message?.type === 'text') {
       const userText = event.message.text.trim();
       const replyToken = event.replyToken;
+      const source = event.source || {};
 
       if (!replyToken) continue;
+
+      // Handle Trigger Name logic:
+      // - In Group Chat: must start with "buddy" or "บัดดี้"
+      // - In Private Chat: trigger not required, but strip if present
+      let questionText = userText;
+      const triggerRegex = /^(buddy|บัดดี้)\s*,?\s*(.*)$/i;
+      const match = userText.match(triggerRegex);
+
+      if (source.type === 'group' || source.type === 'room') {
+        if (!match) {
+          // If in a group chat and does not mention "buddy" or "บัดดี้" as prefix, ignore it
+          continue;
+        }
+        // Extract the actual question following the trigger name
+        questionText = match[2].trim();
+      } else {
+        // In private chat: if they start with the trigger, strip it. Otherwise use the whole text.
+        if (match) {
+          questionText = match[2].trim();
+        }
+      }
+
+      // If the question is empty (e.g. they just said "buddy" / "บัดดี้")
+      if (!questionText) {
+        await replyMessage(
+          replyToken, 
+          'สวัสดีครับผม บัดดี้ (Buddy) ยินดีให้บริการครับ! ท่านต้องการสอบถามข้อมูลอะไรเกี่ยวกับแบบประเมินการฝึกหน้าร้านไหมครับ? (เช่น "ขอคะแนนเฉลี่ยภาพรวม" หรือ "ขอสถิติแยกตามสาขา")', 
+          channelAccessToken
+        );
+        continue;
+      }
 
       // We read our prompt rules and schema definition from sql_bot.md
       let sqlBotContext = '';
@@ -179,6 +211,8 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
+      const geminiModel = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
+
       // Instruct Gemini to evaluate if the query can be answered, or if it asks for non-existent information
       const analysisPrompt = `
 You are a Text-to-SQL translator and Database analyst.
@@ -187,7 +221,7 @@ Here is the database reference document (containing schema, connection details, 
 ${sqlBotContext}
 ---
 
-User Question: "${userText}"
+User Question: "${questionText}"
 
 Tasks:
 1. Identify if the user's question asks for information that is NOT in the database (e.g. trainee names, employee IDs, trainer names, phone numbers, branch addresses).
@@ -200,7 +234,7 @@ Tasks:
 Output your response now:
 `;
 
-      const geminiResponse = await queryGemini(analysisPrompt, geminiKey);
+      const geminiResponse = await queryGemini(analysisPrompt, geminiKey, geminiModel);
       const cleanResponse = geminiResponse.trim();
 
       if (!cleanResponse) {
@@ -250,7 +284,7 @@ Output your response now:
         // Send results back to Gemini to write a natural summary response in Thai
         const summaryPrompt = `
 You are a helpful data analyst bot.
-The user asked: "${userText}"
+The user asked: "${questionText}"
 You generated and successfully ran this SQL query: "${cleanResponse}"
 The query returned these results from the database:
 ${JSON.stringify(queryResults, null, 2)}
@@ -259,7 +293,7 @@ Write a polite, concise, and clear summary response in Thai to answer the user's
 If there are no results, explain it politely. Keep numbers and averages easy to read.
 `;
 
-        const finalAnswer = await queryGemini(summaryPrompt, geminiKey);
+        const finalAnswer = await queryGemini(summaryPrompt, geminiKey, geminiModel);
         await replyMessage(replyToken, finalAnswer.trim() || 'คิวรีข้อมูลสำเร็จ แต่ไม่สามารถแปลคำตอบได้', channelAccessToken);
       } else {
         // Fallback message
