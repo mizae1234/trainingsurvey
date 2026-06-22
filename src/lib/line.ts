@@ -252,3 +252,155 @@ export function createStatsFlexMessage(todayCount: number, totalCount: number, l
   };
 }
 
+/**
+ * Generates a styled LINE Flex Message bubble for a newly assigned task
+ */
+export function createTaskFlexMessage(task: {
+  id: number;
+  assignee?: string | null;
+  description: string;
+  displayName?: string | null;
+}, liffId: string): LineMessage {
+  const taskUri = `https://liff.line.me/${liffId}/admin/tasks?id=${task.id}`;
+
+  return {
+    type: 'flex',
+    altText: 'บัดดี้ บันทึกมอบหมายงานสำเร็จ! 📝',
+    contents: {
+      type: 'bubble',
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        backgroundColor: '#10B981',
+        paddingAll: '20px',
+        contents: [
+          {
+            type: 'text',
+            text: 'TASK ASSIGNED',
+            color: '#FFFFFF',
+            weight: 'bold',
+            size: 'sm',
+            letterSpacing: '1px'
+          },
+          {
+            type: 'text',
+            text: 'บัดดี้ (Buddy) บันทึกมอบหมายงานสำเร็จ',
+            color: '#E6F4EA',
+            size: 'xs',
+            margin: 'xs'
+          }
+        ]
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        contents: [
+          {
+            type: 'text',
+            text: `งานมอบหมายหมายเลข #${task.id}`,
+            weight: 'bold',
+            size: 'md',
+            color: '#111827'
+          },
+          {
+            type: 'separator',
+            margin: 'lg'
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            margin: 'lg',
+            spacing: 'sm',
+            contents: [
+              {
+                type: 'box',
+                layout: 'horizontal',
+                contents: [
+                  {
+                    type: 'text',
+                    text: 'ผู้รับผิดชอบ:',
+                    size: 'sm',
+                    color: '#4B5563',
+                    flex: 2
+                  },
+                  {
+                    type: 'text',
+                    text: task.assignee || 'ไม่ได้ระบุ',
+                    size: 'sm',
+                    weight: 'bold',
+                    color: '#10B981',
+                    align: 'right',
+                    flex: 3
+                  }
+                ]
+              },
+              {
+                type: 'box',
+                layout: 'horizontal',
+                contents: [
+                  {
+                    type: 'text',
+                    text: 'ผู้สั่งงาน:',
+                    size: 'sm',
+                    color: '#4B5563',
+                    flex: 2
+                  },
+                  {
+                    type: 'text',
+                    text: task.displayName || 'ไม่ได้ระบุ',
+                    size: 'sm',
+                    color: '#111827',
+                    align: 'right',
+                    flex: 3
+                  }
+                ]
+              },
+              {
+                type: 'box',
+                layout: 'vertical',
+                margin: 'md',
+                contents: [
+                  {
+                    type: 'text',
+                    text: 'รายละเอียดงาน:',
+                    size: 'sm',
+                    color: '#4B5563',
+                    margin: 'sm'
+                  },
+                  {
+                    type: 'text',
+                    text: task.description,
+                    size: 'sm',
+                    color: '#111827',
+                    wrap: true,
+                    margin: 'xs',
+                    weight: 'medium'
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      footer: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        contents: [
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#10B981',
+            action: {
+              type: 'uri',
+              label: 'ดูรายละเอียดและทำเสร็จสิ้น',
+              uri: taskUri
+            }
+          }
+        ]
+      }
+    }
+  };
+}
+

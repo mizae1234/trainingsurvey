@@ -104,4 +104,16 @@ model LogChat {
   status       String   // "SUCCESS", "ERROR", "NOT_IN_DB"
 }
 
+model BuddyTask {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  lineUserId  String
+  displayName String?
+  lineGroupId String?
+  groupName   String?
+  assignee    String?
+  description String
+  status      String   @default("PENDING") // "PENDING", "COMPLETED"
+}
+
 

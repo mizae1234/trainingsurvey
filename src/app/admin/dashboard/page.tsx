@@ -13,9 +13,13 @@ export default async function AdminDashboardPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const currentUser = await getCurrentUser();
-  
+  const params = await searchParams;
+  const taskId = params.id;
+  if (taskId && typeof taskId === 'string') {
+    redirect(`/admin/tasks?id=${taskId}`);
+  }
+
   if (!currentUser) {
-    const params = await searchParams;
     const urlParams = new URLSearchParams();
     for (const [key, val] of Object.entries(params)) {
       if (typeof val === 'string') {

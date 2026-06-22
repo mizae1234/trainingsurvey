@@ -284,3 +284,64 @@ export async function askBotWebAction(userMessage: string) {
     return { success: false, error: 'เกิดข้อผิดพลาดในการตอบคำถาม: ' + error.message };
   }
 }
+
+/**
+ * Fetch all Buddy Tasks
+ * Accessible to ADMIN and SUPER_ADMIN roles
+ */
+export async function getBuddyTasks() {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || (currentUser.role !== 'ADMIN' && currentUser.role !== 'SUPER_ADMIN')) {
+      return { success: false, error: 'คุณไม่มีสิทธิ์เข้าถึงข้อมูลส่วนนี้', tasks: [] };
+    }
+
+    const tasks = await db.buddyTask.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return {
+      success: true,
+      tasks: tasks.map(t => ({
+        ...t,
+        createdAt: t.createdAt.toISOString()
+      }))
+    };
+  } catch (error: any) {
+    console.error('Error getting buddy tasks:', error);
+    return { success: false, error: 'ไม่สามารถดึงข้อมูลงานมอบหมายได้', tasks: [] };
+  }
+}
+
+/**
+ * Mark a Buddy Task as completed
+ */
+export async function completeBuddyTask(taskId: number) {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return { success: false, error: 'กรุณาล็อกอินก่อนดำเนินการ' };
+    }
+
+    // Verify task exists
+    const task = await db.buddyTask.findUnique({
+      where: { id: taskId }
+    });
+
+    if (!task) {
+      return { success: false, error: 'ไม่พบงานมอบหมายดังกล่าว' };
+    }
+
+    // Update status to COMPLETED
+    await db.buddyTask.update({
+      where: { id: taskId },
+      data: { status: 'COMPLETED' }
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error completing buddy task:', error);
+    return { success: false, error: 'ไม่สามารถอัปเดตสถานะงานได้: ' + error.message };
+  }
+}
+

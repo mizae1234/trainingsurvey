@@ -7,7 +7,9 @@ import {
   updateUserRole, 
   getLineGroups, 
   toggleGroupNotifications,
-  getLogChats
+  getLogChats,
+  getBuddyTasks,
+  completeBuddyTask
 } from '@/app/actions/line';
 import { 
   Sliders, 
@@ -41,12 +43,13 @@ interface SuperContentProps {
 }
 
 export default function SuperContent({ currentUser }: SuperContentProps) {
-  const [activeTab, setActiveTab] = useState<'groups' | 'users' | 'logchats'>('groups');
+  const [activeTab, setActiveTab] = useState<'groups' | 'users' | 'logchats' | 'tasks'>('groups');
   
   // States
   const [lineUsers, setLineUsers] = useState<any[]>([]);
   const [lineGroups, setLineGroups] = useState<any[]>([]);
   const [logChats, setLogChats] = useState<any[]>([]);
+  const [buddyTasks, setBuddyTasks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -56,6 +59,8 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
   const [groupSearch, setGroupSearch] = useState('');
   const [logSearch, setLogSearch] = useState('');
   const [logStatusFilter, setLogStatusFilter] = useState('all');
+  const [taskSearch, setTaskSearch] = useState('');
+  const [taskStatusFilter, setTaskStatusFilter] = useState('all');
 
   // Collapsible SQL queries state
   const [expandedSql, setExpandedSql] = useState<Record<string, boolean>>({});
@@ -64,6 +69,7 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
   const [userPage, setUserPage] = useState(1);
   const [groupPage, setGroupPage] = useState(1);
   const [logPage, setLogPage] = useState(1);
+  const [taskPage, setTaskPage] = useState(1);
   const itemsPerPage = 10;
 
   // Load Data
@@ -71,9 +77,10 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      const [usersRes, groupsRes] = await Promise.all([
+      const [usersRes, groupsRes, tasksRes] = await Promise.all([
         getLineUsers(),
-        getLineGroups()
+        getLineGroups(),
+        getBuddyTasks()
       ]);
       
       if (usersRes.success) setLineUsers(usersRes.users || []);
@@ -81,6 +88,9 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
 
       if (groupsRes.success) setLineGroups(groupsRes.groups || []);
       else setErrorMsg(prev => prev || groupsRes.error || 'Failed to load groups');
+
+      if (tasksRes.success) setBuddyTasks(tasksRes.tasks || []);
+      else setErrorMsg(prev => prev || tasksRes.error || 'Failed to load tasks');
 
       if (currentUser.role === 'SUPER_ADMIN' || currentUser.id === 'fallback-admin') {
         const logsRes = await getLogChats();
@@ -185,6 +195,26 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
     return filteredLogs.slice(start, start + itemsPerPage);
   }, [filteredLogs, logPage]);
 
+  // Filtered Tasks
+  const filteredTasks = useMemo(() => {
+    return buddyTasks.filter(t => {
+      const matchesSearch = 
+        t.description.toLowerCase().includes(taskSearch.toLowerCase()) ||
+        (t.assignee && t.assignee.toLowerCase().includes(taskSearch.toLowerCase())) ||
+        (t.displayName && t.displayName.toLowerCase().includes(taskSearch.toLowerCase())) ||
+        (t.groupName && t.groupName.toLowerCase().includes(taskSearch.toLowerCase()));
+
+      const matchesStatus = taskStatusFilter === 'all' || t.status === taskStatusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [buddyTasks, taskSearch, taskStatusFilter]);
+
+  const paginatedTasks = useMemo(() => {
+    const start = (taskPage - 1) * itemsPerPage;
+    return filteredTasks.slice(start, start + itemsPerPage);
+  }, [filteredTasks, taskPage]);
+
   // Format Date Helper
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleString('th-TH', {
@@ -268,6 +298,12 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
             className={`admin-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
           >
             ตั้งค่าสิทธิ์ผู้ใช้งาน ({lineUsers.length})
+          </button>
+          <button 
+            onClick={() => setActiveTab('tasks')} 
+            className={`admin-tab-btn ${activeTab === 'tasks' ? 'active' : ''}`}
+          >
+            งานมอบหมาย (Buddy Tasks) ({buddyTasks.length})
           </button>
           {(currentUser.role === 'SUPER_ADMIN' || currentUser.id === 'fallback-admin') && (
             <button 
@@ -600,6 +636,171 @@ export default function SuperContent({ currentUser }: SuperContentProps) {
                   <button disabled={logPage === Math.ceil(filteredLogs.length / itemsPerPage)} onClick={() => setLogPage(p => p + 1)} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }}>ถัดไป</button>
                 </div>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Tasks management */}
+        {activeTab === 'tasks' && (
+          <div className="dashboard-card" style={{ padding: '24px' }}>
+            <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>รายการงานมอบหมาย (Buddy Tasks)</h2>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>รายการงานมอบหมายทั้งหมดที่บันทึกผ่านบัดดี้โน้ต</p>
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '250px', position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Search size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  value={taskSearch}
+                  onChange={(e) => { setTaskSearch(e.target.value); setTaskPage(1); }}
+                  placeholder="ค้นหารายละเอียด ผู้รับผิดชอบ หรือผู้สั่งงาน..."
+                  className="filter-input"
+                  style={{ paddingLeft: '36px', width: '100%' }}
+                />
+              </div>
+              <select
+                value={taskStatusFilter}
+                onChange={(e) => { setTaskStatusFilter(e.target.value); setTaskPage(1); }}
+                className="filter-input"
+                style={{ maxWidth: '180px' }}
+              >
+                <option value="all">ทุกสถานะ</option>
+                <option value="PENDING">กำลังดำเนินการ (PENDING)</option>
+                <option value="COMPLETED">เสร็จสิ้น (COMPLETED)</option>
+              </select>
+            </div>
+
+            {/* Table */}
+            {isLoading ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                กำลังโหลดข้อมูล...
+              </div>
+            ) : filteredTasks.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px dashed #E2E8F0' }}>
+                ไม่พบข้อมูลงานมอบหมาย
+              </div>
+            ) : (
+              <>
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                  <table className="survey-table" style={{ minWidth: '800px', width: '100%' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: '80px' }}>ID</th>
+                        <th style={{ width: '120px' }}>สถานะ</th>
+                        <th style={{ width: '150px' }}>ผู้รับผิดชอบ</th>
+                        <th style={{ width: '180px' }}>ผู้สั่งงาน</th>
+                        <th>รายละเอียดงาน</th>
+                        <th style={{ width: '150px' }}>วันที่มอบหมาย</th>
+                        <th style={{ width: '100px' }}>การจัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedTasks.map((t) => (
+                        <tr key={t.id}>
+                          <td style={{ fontWeight: 600 }}>#{t.id}</td>
+                          <td>
+                            {t.status === 'COMPLETED' ? (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#D1FAE5', color: '#065F46', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}>
+                                <CheckCircle size={10} /> เสร็จสิ้น
+                              </span>
+                            ) : (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: '#FFEDD5', color: '#9A3412', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}>
+                                <Clock size={10} /> ดำเนินการ
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
+                            {t.assignee || 'ไม่ได้ระบุ'}
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 500 }}>{t.displayName || 'LINE User'}</div>
+                            {t.groupName && (
+                              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                                กลุ่ม: {t.groupName}
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ whiteSpace: 'normal', wordBreak: 'break-word', maxWidth: '300px' }}>
+                            {t.description}
+                          </td>
+                          <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                            {formatDate(t.createdAt)}
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <Link 
+                                href={`/admin/tasks?id=${t.id}`}
+                                className="btn btn-secondary"
+                                style={{ padding: '4px 8px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                              >
+                                ดูหน้ารายละเอียด
+                              </Link>
+                              {t.status !== 'COMPLETED' && (
+                                <button
+                                  onClick={async () => {
+                                    if (confirm('คุณต้องการเปลี่ยนสถานะงานนี้เป็นเสร็จสิ้นใช่หรือไม่?')) {
+                                      try {
+                                        const res = await completeBuddyTask(t.id);
+                                        if (res.success) {
+                                          setSuccessMsg('บันทึกงานเสร็จสิ้นสำเร็จ');
+                                          setBuddyTasks(prev => prev.map(item => item.id === t.id ? { ...item, status: 'COMPLETED' } : item));
+                                          setTimeout(() => setSuccessMsg(null), 3000);
+                                        } else {
+                                          setErrorMsg(res.error || 'ไม่สามารถอัปเดตงานได้');
+                                          setTimeout(() => setErrorMsg(null), 4000);
+                                        }
+                                      } catch (err: any) {
+                                        setErrorMsg(err.message || 'Error completing task');
+                                        setTimeout(() => setErrorMsg(null), 4000);
+                                      }
+                                    }
+                                  }}
+                                  className="btn btn-primary"
+                                  style={{ padding: '4px 8px', fontSize: '11px', whiteSpace: 'nowrap', backgroundColor: '#10B981', borderColor: '#10B981' }}
+                                >
+                                  เสร็จสิ้น
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {filteredTasks.length > itemsPerPage && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+                    <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                      แสดง {Math.min(filteredTasks.length, (taskPage - 1) * itemsPerPage + 1)} ถึง {Math.min(filteredTasks.length, taskPage * itemsPerPage)} จาก {filteredTasks.length} รายการ
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => setTaskPage(prev => Math.max(prev - 1, 1))}
+                        disabled={taskPage === 1}
+                        className="btn btn-secondary"
+                        style={{ padding: '6px 12px', fontSize: '13px' }}
+                      >
+                        ก่อนหน้า
+                      </button>
+                      <button
+                        onClick={() => setTaskPage(prev => Math.min(prev + 1, Math.ceil(filteredTasks.length / itemsPerPage)))}
+                        disabled={taskPage >= Math.ceil(filteredTasks.length / itemsPerPage)}
+                        className="btn btn-secondary"
+                        style={{ padding: '6px 12px', fontSize: '13px' }}
+                      >
+                        ถัดไป
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

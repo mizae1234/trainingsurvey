@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { adminLogout } from '@/app/actions/admin';
 import * as XLSX from 'xlsx';
 import Link from 'next/link';

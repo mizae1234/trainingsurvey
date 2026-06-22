@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { verifySignature, replyMessage, getGroupName, createTextMessage, getUserProfile, createStatsFlexMessage } from '@/lib/line';
+import { verifySignature, replyMessage, getGroupName, createTextMessage, getUserProfile, createStatsFlexMessage, createTaskFlexMessage } from '@/lib/line';
 import { askBotEngine } from '@/lib/bot-engine';
 
 // Helper to save conversation logs
@@ -217,6 +217,62 @@ export async function POST(req: NextRequest) {
         });
         continue;
       }
+
+      // Check if it matches "note : <content>" (case insensitive)
+      const noteMatch = questionText.match(/^note\s*:\s*(.*)$/i);
+      if (noteMatch) {
+        const noteContent = noteMatch[1].trim();
+        
+        // Extract assignee (e.g. @name)
+        const assigneeMatch = noteContent.match(/@(\S+)/);
+        const assignee = assigneeMatch ? `@${assigneeMatch[1]}` : null;
+        
+        try {
+          // Create BuddyTask in DB
+          const createdTask = await db.buddyTask.create({
+            data: {
+              lineUserId: source.userId || 'unknown',
+              displayName,
+              lineGroupId: source.groupId || null,
+              groupName,
+              assignee,
+              description: noteContent,
+              status: 'PENDING'
+            }
+          });
+
+          // Generate Flex Card response
+          const liffId = process.env.NEXT_PUBLIC_LIFF_ID || '';
+          const flexMsg = createTaskFlexMessage({
+            id: createdTask.id,
+            assignee: createdTask.assignee,
+            description: createdTask.description,
+            displayName: createdTask.displayName
+          }, liffId);
+
+          // Reply back to LINE
+          await replyMessage(replyToken, flexMsg, channelAccessToken);
+
+          // Save log inside LogChat DB
+          await writeChatLog({
+            lineUserId: source.userId || 'unknown',
+            displayName,
+            lineGroupId: source.groupId,
+            groupName,
+            question: userText,
+            answer: `บันทึกงานมอบหมายสำเร็จ หมายเลข #${createdTask.id}`,
+            status: 'TASK_ASSIGNED'
+          });
+          
+          continue;
+        } catch (taskErr: any) {
+          console.error('Error creating buddy task:', taskErr);
+          const errorReply = 'ขออภัยครับ ไม่สามารถบันทึกงานมอบหมายได้ในขณะนี้';
+          await replyMessage(replyToken, createTextMessage(errorReply), channelAccessToken);
+          continue;
+        }
+      }
+
 
       // Fetch conversation history context (last 8 turns in same channel)
       let historyText = '';
