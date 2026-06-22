@@ -90,3 +90,33 @@ export function createFlexMessage(altText: string, container: any): LineMessage 
     contents: container
   };
 }
+
+export interface LineUserProfile {
+  displayName: string;
+  userId: string;
+  pictureUrl?: string;
+  statusMessage?: string;
+}
+
+/**
+ * Fetch LINE user profile using Messaging API
+ */
+export async function getUserProfile(
+  userId: string,
+  channelAccessToken: string
+): Promise<LineUserProfile | null> {
+  try {
+    const url = `https://api.line.me/v2/bot/profile/${userId}`;
+    const response = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${channelAccessToken}` }
+    });
+
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (err) {
+    console.error('Error fetching user profile from LINE:', err);
+  }
+  return null;
+}
+

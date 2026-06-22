@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { verifySignature, replyMessage, getGroupName, createTextMessage } from '@/lib/line';
+import { verifySignature, replyMessage, getGroupName, createTextMessage, getUserProfile } from '@/lib/line';
 import { askBotEngine } from '@/lib/bot-engine';
 
 // Helper to save conversation logs
@@ -138,11 +138,29 @@ export async function POST(req: NextRequest) {
 
       try {
         if (source.userId) {
-          const user = await db.user.findUnique({
+          let user = await db.user.findUnique({
             where: { lineUserId: source.userId }
           });
-          displayName = user?.displayName || null;
+          
+          if (!user) {
+            // Automatically register new LINE user interacting with the bot
+            const lineProfile = await getUserProfile(source.userId, channelAccessToken);
+            const lineName = lineProfile?.displayName || 'LINE User';
+            const pictureUrl = lineProfile?.pictureUrl || null;
+            
+            user = await db.user.create({
+              data: {
+                lineUserId: source.userId,
+                displayName: lineName,
+                pictureUrl,
+                role: 'USER'
+              }
+            });
+            console.log(`Auto-registered new user: ${lineName} (${source.userId})`);
+          }
+          displayName = user.displayName;
         }
+        
         if (source.groupId) {
           const group = await db.group.findUnique({
             where: { lineGroupId: source.groupId }
@@ -150,12 +168,12 @@ export async function POST(req: NextRequest) {
           groupName = group?.groupName || null;
         }
       } catch (dbErr) {
-        console.error('Error fetching names for LogChat:', dbErr);
+        console.error('Error auto-registering user or fetching names for LogChat:', dbErr);
       }
 
       // If the question is empty (e.g. they just said "buddy" / "บัดดี้")
       if (!questionText) {
-        const welcomeMsg = 'สวัสดีครับผม บัดดี้ (Buddy) ยินดีให้บริการครับ! ท่านต้องการสอบถามข้อมูลอะไรเกี่ยวกับแบบประเมินการฝึกหน้าร้านไหมครับ? (เช่น "ขอคะแนนเฉลี่ยภาพรวม" หรือ "ขอสถิติแยกตามสาขา")';
+        const welcomeMsg = 'สวัสดีครับผม บัดดี้ (Buddy) ผู้ช่วยอัจฉริยะที่จะช่วยรายงานข้อมูลสถิติและผลคะแนนประเมินการฝึกหน้าร้านครับ 📊✨\n\nสามารถสอบถามข้อมูลที่ต้องการได้เลยครับ (เช่น "ขอคะแนนเฉลี่ยภาพรวมทั้งหมด" หรือ "สรุปสถิติคะแนนของสาขาบางนา") 💛';
         await replyMessage(replyToken, createTextMessage(welcomeMsg), channelAccessToken);
         
         await writeChatLog({
@@ -165,6 +183,23 @@ export async function POST(req: NextRequest) {
           groupName,
           question: userText,
           answer: welcomeMsg,
+          status: 'NOT_IN_DB'
+        });
+        continue;
+      }
+
+      // Special Keyword Check: "ลงทะเบียน" or "register"
+      if (questionText.trim() === 'ลงทะเบียน' || questionText.trim().toLowerCase() === 'register') {
+        const regMsg = 'ลงทะเบียนสิทธิ์ใช้งานขั้นต้นสำเร็จแล้วครับ! 🎉\n\nบัดดี้ได้เพิ่มประวัติผู้ใช้งานของคุณในระบบเรียบร้อยแล้ว (สิทธิ์ระดับ USER) ในกรณีที่คุณต้องการเข้าใช้งานหน้าเว็บผู้ดูแลระบบ กรุณาติดต่อผู้ดูแลระบบหลักเพื่อปรับระดับสิทธิ์การเข้าใช้งานครับ 💛';
+        await replyMessage(replyToken, createTextMessage(regMsg), channelAccessToken);
+
+        await writeChatLog({
+          lineUserId: source.userId || 'unknown',
+          displayName,
+          lineGroupId: source.groupId,
+          groupName,
+          question: questionText,
+          answer: regMsg,
           status: 'NOT_IN_DB'
         });
         continue;
