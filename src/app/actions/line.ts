@@ -24,12 +24,13 @@ export async function getCurrentUser() {
 
     const userId = cookieStore.get('admin_user_id')?.value;
     if (!userId) {
-      // Fallback admin (logged in via password) gets HR_VIEWER role (restricted to survey statistics only)
+      // Fallback admin (logged in via password) gets SUPER_ADMIN in development, but restricted HR_VIEWER in production
+      const isDev = process.env.NODE_ENV === 'development';
       return {
         id: 'fallback-admin',
         displayName: 'Fallback Admin',
         pictureUrl: null,
-        role: 'HR_VIEWER',
+        role: isDev ? 'SUPER_ADMIN' : 'HR_VIEWER',
         lineUserId: 'fallback'
       };
     }
@@ -58,32 +59,22 @@ export async function loginWithLine(profile: LineProfile) {
       where: { lineUserId: profile.userId }
     });
 
-    const adminCount = await db.user.count({
-      where: {
-        OR: [{ role: 'ADMIN' }, { role: 'SUPER_ADMIN' }]
-      }
-    });
-
     if (!user) {
       user = await db.user.create({
         data: {
           lineUserId: profile.userId,
           displayName: profile.displayName || 'LINE User',
           pictureUrl: profile.pictureUrl || null,
-          role: adminCount === 0 ? 'SUPER_ADMIN' : 'USER'
+          role: 'USER'
         }
       });
     } else {
-      // If there are no ADMIN/SUPER_ADMINs in the system, promote this existing user to SUPER_ADMIN
-      const targetRole = (user.role === 'USER' && adminCount === 0) ? 'SUPER_ADMIN' : user.role;
-
       // Update profile info if changed
       user = await db.user.update({
         where: { id: user.id },
         data: {
           displayName: profile.displayName || user.displayName,
-          pictureUrl: profile.pictureUrl || user.pictureUrl,
-          role: targetRole
+          pictureUrl: profile.pictureUrl || user.pictureUrl
         }
       });
     }
