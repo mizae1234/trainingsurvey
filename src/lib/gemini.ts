@@ -61,9 +61,10 @@ ${historyText ? `## ประวัติการถามตอบในแช
 User Question: "${questionText}"
 
 Tasks:
-1. Identify if the user's question asks for information that is NOT in the database (e.g. trainee names, employee IDs, trainer names, phone numbers, branch addresses).
-2. If it is NOT in the database, return a response starting with "NOT_IN_DB: " followed by a brief explanation in Thai about what information is missing.
-3. If it can be answered using the database:
+1. If the user's question is a general greeting (e.g., "สวัสดี", "hi", "hello"), a test message (e.g., "test", "ทดสอบ"), or a direct question about your identity/who you are (e.g., "คุณคือใคร", "คือคัย", "ชื่ออะไร", "buddy คือคัย"), reply directly with a friendly, conversational answer in Thai as "บัดดี้" (Buddy) explaining that you are a helpful assistant for store training statistics. Do NOT mention database tables, missing columns, trainee names, or SQL in this case.
+2. Identify if the user's question asks for database information that is NOT in the database (e.g. trainee names, employee IDs, trainer names, phone numbers, branch addresses).
+3. If it is NOT in the database, return a response starting with "NOT_IN_DB: " followed by a brief explanation in Thai about what information is missing.
+4. If it can be answered using the database:
    - Generate a single, clean PostgreSQL SQL query.
    - The query must use proper double quotes for table names like "SurveyResponse" or "Holiday" since they contain capital letters.
    - Return ONLY the raw SQL query. Do not wrap it in code blocks (markdown blocks \`\`\`sql) or add comments. Just output the query starting with "SELECT".
