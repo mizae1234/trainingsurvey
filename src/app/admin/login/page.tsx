@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { loginWithLine } from '@/app/actions/line';
-import { AlertCircle, MessageSquare } from 'lucide-react';
+import { adminLogin } from '@/app/actions/admin';
+import { AlertCircle, MessageSquare, Lock } from 'lucide-react';
 import Script from 'next/script';
 
 declare global {
@@ -53,6 +54,8 @@ function getRedirectPath(searchString: string): string | null {
 
 export default function AdminLoginPage() {
   const [isLineSubmitting, setIsLineSubmitting] = useState(false);
+  const [password, setPassword] = useState('');
+  const [isPasscodeSubmitting, setIsPasscodeSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [liffError, setLiffError] = useState<string | null>(null);
   const [liffInitialized, setLiffInitialized] = useState(false);
@@ -159,7 +162,33 @@ export default function AdminLoginPage() {
     }
   };
 
-  // Password login submit handler removed
+  // Password login submit handler
+  const handlePasscodeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password.trim()) return;
+    setIsPasscodeSubmitting(true);
+    setError(null);
+    try {
+      const res = await adminLogin(password);
+      if (res.success) {
+        let redirectUrl = '/admin/dashboard';
+        if (typeof window !== 'undefined') {
+          const savedPath = localStorage.getItem('redirect_after_login');
+          if (savedPath) {
+            redirectUrl = savedPath;
+            localStorage.removeItem('redirect_after_login');
+          }
+        }
+        window.location.href = redirectUrl;
+      } else {
+        setError(res.error || 'รหัสผ่านไม่ถูกต้อง');
+      }
+    } catch (err: any) {
+      setError('เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์');
+    } finally {
+      setIsPasscodeSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -215,6 +244,39 @@ export default function AdminLoginPage() {
                 {liffError}
               </div>
             )}
+
+            {/* Divider */}
+            <div style={{ display: 'flex', alignItems: 'center', margin: '24px 0', color: '#94A3B8', fontSize: '12px' }}>
+              <hr style={{ flex: 1, border: 'none', borderTop: '1px solid #E2E8F0' }} />
+              <span style={{ padding: '0 12px' }}>หรือเข้าสู่ระบบด้วยรหัสผ่านสำรอง</span>
+              <hr style={{ flex: 1, border: 'none', borderTop: '1px solid #E2E8F0' }} />
+            </div>
+
+            {/* Passcode Login Form */}
+            <form onSubmit={handlePasscodeSubmit}>
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label" htmlFor="password" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#475569' }}>
+                  <Lock size={14} /> รหัสผ่านผู้ดูแลระบบ
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  className="form-input"
+                  placeholder="กรอกรหัสผ่าน..."
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', marginTop: '6px', fontSize: '14px', borderRadius: 'var(--radius-sm)' }}
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn btn-secondary w-full"
+                disabled={isPasscodeSubmitting}
+                style={{ padding: '10px', fontSize: '14px', cursor: isPasscodeSubmitting ? 'not-allowed' : 'pointer' }}
+              >
+                {isPasscodeSubmitting ? 'กำลังตรวจสอบรหัสผ่าน...' : 'เข้าสู่ระบบ'}
+              </button>
+            </form>
           </div>
         </div>
       </div>

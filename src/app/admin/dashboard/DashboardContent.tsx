@@ -34,29 +34,29 @@ interface ResponseData {
   branch1TrainingStart: string;
   branch1TrainingEnd: string;
   branch1Duration: number;
-  branch2: string;
-  branch2TrainingStart: string;
-  branch2TrainingEnd: string;
-  branch2Duration: number;
+  branch2: string | null;
+  branch2TrainingStart: string | null;
+  branch2TrainingEnd: string | null;
+  branch2Duration: number | null;
   q1_benefit: number;
   q2_apply_knowledge: number;
-  q3_consistency: number;
+  q3_consistency: number | null;
   q4_1_duration_suitability: string;
   q4_2_branches_suitability: string;
   q5_clarity_branch1: number;
-  q5_clarity_branch2: number;
+  q5_clarity_branch2: number | null;
   q6_volume_branch1: number;
-  q6_volume_branch2: number;
+  q6_volume_branch2: number | null;
   q7_readiness_branch1: number;
-  q7_readiness_branch2: number;
+  q7_readiness_branch2: number | null;
   q8_trainer_knowledge_branch1: number;
-  q8_trainer_knowledge_branch2: number;
+  q8_trainer_knowledge_branch2: number | null;
   q9_safety_hygiene_branch1: number;
-  q9_safety_hygiene_branch2: number;
+  q9_safety_hygiene_branch2: number | null;
   q10_trainer_care_branch1: number;
-  q10_trainer_care_branch2: number;
+  q10_trainer_care_branch2: number | null;
   q11_atmosphere_branch1: number;
-  q11_atmosphere_branch2: number;
+  q11_atmosphere_branch2: number | null;
   feedback12_challenging: string | null;
   feedback13_ideal_setup: string | null;
   feedback14_impressions: string | null;
@@ -121,7 +121,7 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
     return responses.filter(res => {
       const matchSearch = 
         res.branch1.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        res.branch2.toLowerCase().includes(searchTerm.toLowerCase());
+        (res.branch2 ? res.branch2.toLowerCase().includes(searchTerm.toLowerCase()) : false);
       
       const matchDate = !dateFilter || res.createdAt.startsWith(dateFilter);
       
@@ -149,9 +149,12 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
     let sumGeneral = 0;
     let sumBranch1 = 0;
     let sumBranch2 = 0;
+    let totalBranch2Evaluated = 0;
 
     filteredResponses.forEach(r => {
-      sumGeneral += (r.q1_benefit + r.q2_apply_knowledge + r.q3_consistency) / 3;
+      const q3Val = r.q3_consistency;
+      const hasQ3 = q3Val !== null && q3Val !== undefined && q3Val > 0;
+      sumGeneral += (r.q1_benefit + r.q2_apply_knowledge + (hasQ3 ? q3Val : 0)) / (hasQ3 ? 3 : 2);
       
       sumBranch1 += (
         r.q5_clarity_branch1 + 
@@ -163,22 +166,25 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
         r.q11_atmosphere_branch1
       ) / 7;
 
-      sumBranch2 += (
-        r.q5_clarity_branch2 + 
-        r.q6_volume_branch2 + 
-        r.q7_readiness_branch2 + 
-        r.q8_trainer_knowledge_branch2 + 
-        r.q9_safety_hygiene_branch2 + 
-        r.q10_trainer_care_branch2 + 
-        r.q11_atmosphere_branch2
-      ) / 7;
+      if (r.branch2 && r.branch2.trim()) {
+        sumBranch2 += (
+          (r.q5_clarity_branch2 || 0) + 
+          (r.q6_volume_branch2 || 0) + 
+          (r.q7_readiness_branch2 || 0) + 
+          (r.q8_trainer_knowledge_branch2 || 0) + 
+          (r.q9_safety_hygiene_branch2 || 0) + 
+          (r.q10_trainer_care_branch2 || 0) + 
+          (r.q11_atmosphere_branch2 || 0)
+        ) / 7;
+        totalBranch2Evaluated++;
+      }
     });
 
     return {
       total,
       avgGeneral: parseFloat((sumGeneral / total).toFixed(2)),
       avgBranch1: parseFloat((sumBranch1 / total).toFixed(2)),
-      avgBranch2: parseFloat((sumBranch2 / total).toFixed(2))
+      avgBranch2: totalBranch2Evaluated > 0 ? parseFloat((sumBranch2 / totalBranch2Evaluated).toFixed(2)) : 0
     };
   }, [filteredResponses]);
 
@@ -257,21 +263,21 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
           }
           const bData = branchesMap[b2];
           bData.responseCount += 1;
-          bData.q5Sum += res.q5_clarity_branch2;
-          bData.q6Sum += res.q6_volume_branch2;
-          bData.q7Sum += res.q7_readiness_branch2;
-          bData.q8Sum += res.q8_trainer_knowledge_branch2;
-          bData.q9Sum += res.q9_safety_hygiene_branch2;
-          bData.q10Sum += res.q10_trainer_care_branch2;
-          bData.q11Sum += res.q11_atmosphere_branch2;
+          bData.q5Sum += res.q5_clarity_branch2 || 0;
+          bData.q6Sum += res.q6_volume_branch2 || 0;
+          bData.q7Sum += res.q7_readiness_branch2 || 0;
+          bData.q8Sum += res.q8_trainer_knowledge_branch2 || 0;
+          bData.q9Sum += res.q9_safety_hygiene_branch2 || 0;
+          bData.q10Sum += res.q10_trainer_care_branch2 || 0;
+          bData.q11Sum += res.q11_atmosphere_branch2 || 0;
           bData.totalScoreSum += (
-            res.q5_clarity_branch2 +
-            res.q6_volume_branch2 +
-            res.q7_readiness_branch2 +
-            res.q8_trainer_knowledge_branch2 +
-            res.q9_safety_hygiene_branch2 +
-            res.q10_trainer_care_branch2 +
-            res.q11_atmosphere_branch2
+            (res.q5_clarity_branch2 || 0) +
+            (res.q6_volume_branch2 || 0) +
+            (res.q7_readiness_branch2 || 0) +
+            (res.q8_trainer_knowledge_branch2 || 0) +
+            (res.q9_safety_hygiene_branch2 || 0) +
+            (res.q10_trainer_care_branch2 || 0) +
+            (res.q11_atmosphere_branch2 || 0)
           ) / 7;
         }
       }
@@ -350,13 +356,13 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
         allDistinctBranches.add(b);
         if (!branchScores[b]) branchScores[b] = { total: 0, count: 0 };
         branchScores[b].total += (
-          res.q5_clarity_branch2 +
-          res.q6_volume_branch2 +
-          res.q7_readiness_branch2 +
-          res.q8_trainer_knowledge_branch2 +
-          res.q9_safety_hygiene_branch2 +
-          res.q10_trainer_care_branch2 +
-          res.q11_atmosphere_branch2
+          (res.q5_clarity_branch2 || 0) +
+          (res.q6_volume_branch2 || 0) +
+          (res.q7_readiness_branch2 || 0) +
+          (res.q8_trainer_knowledge_branch2 || 0) +
+          (res.q9_safety_hygiene_branch2 || 0) +
+          (res.q10_trainer_care_branch2 || 0) +
+          (res.q11_atmosphere_branch2 || 0)
         ) / 7;
         branchScores[b].count += 1;
       }
@@ -390,7 +396,7 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
     filteredResponses.forEach(r => {
       // General Scores Distribution
       [r.q1_benefit, r.q2_apply_knowledge, r.q3_consistency].forEach(score => {
-        if (score >= 1 && score <= 4) {
+        if (score !== null && score !== undefined && score >= 1 && score <= 4) {
           scoresCount[score as 4 | 3 | 2 | 1] += 1;
         }
       });
@@ -439,29 +445,29 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
       new Date(r.branch1TrainingStart).toLocaleDateString('th-TH'),
       new Date(r.branch1TrainingEnd).toLocaleDateString('th-TH'),
       r.branch1Duration,
-      r.branch2,
-      new Date(r.branch2TrainingStart).toLocaleDateString('th-TH'),
-      new Date(r.branch2TrainingEnd).toLocaleDateString('th-TH'),
-      r.branch2Duration,
+      r.branch2 || '',
+      r.branch2TrainingStart ? new Date(r.branch2TrainingStart).toLocaleDateString('th-TH') : '',
+      r.branch2TrainingEnd ? new Date(r.branch2TrainingEnd).toLocaleDateString('th-TH') : '',
+      r.branch2Duration !== null && r.branch2Duration !== undefined ? r.branch2Duration : '',
       r.q1_benefit,
       r.q2_apply_knowledge,
-      r.q3_consistency,
+      r.q3_consistency !== null && r.q3_consistency !== undefined ? r.q3_consistency : '',
       r.q4_1_duration_suitability,
       r.q4_2_branches_suitability,
       r.q5_clarity_branch1,
-      r.q5_clarity_branch2,
+      r.q5_clarity_branch2 !== null && r.q5_clarity_branch2 !== undefined ? r.q5_clarity_branch2 : '',
       r.q6_volume_branch1,
-      r.q6_volume_branch2,
+      r.q6_volume_branch2 !== null && r.q6_volume_branch2 !== undefined ? r.q6_volume_branch2 : '',
       r.q7_readiness_branch1,
-      r.q7_readiness_branch2,
+      r.q7_readiness_branch2 !== null && r.q7_readiness_branch2 !== undefined ? r.q7_readiness_branch2 : '',
       r.q8_trainer_knowledge_branch1,
-      r.q8_trainer_knowledge_branch2,
+      r.q8_trainer_knowledge_branch2 !== null && r.q8_trainer_knowledge_branch2 !== undefined ? r.q8_trainer_knowledge_branch2 : '',
       r.q9_safety_hygiene_branch1,
-      r.q9_safety_hygiene_branch2,
+      r.q9_safety_hygiene_branch2 !== null && r.q9_safety_hygiene_branch2 !== undefined ? r.q9_safety_hygiene_branch2 : '',
       r.q10_trainer_care_branch1,
-      r.q10_trainer_care_branch2,
+      r.q10_trainer_care_branch2 !== null && r.q10_trainer_care_branch2 !== undefined ? r.q10_trainer_care_branch2 : '',
       r.q11_atmosphere_branch1,
-      r.q11_atmosphere_branch2,
+      r.q11_atmosphere_branch2 !== null && r.q11_atmosphere_branch2 !== undefined ? r.q11_atmosphere_branch2 : '',
       r.feedback12_challenging || '',
       r.feedback13_ideal_setup || '',
       r.feedback14_impressions || '',
@@ -929,15 +935,17 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
                   {paginatedResponses.length > 0 ? (
                     paginatedResponses.map((res) => {
                       // Calculate row average
-                      const rowAvg = parseFloat(((res.q1_benefit + res.q2_apply_knowledge + res.q3_consistency) / 3).toFixed(2));
-                      const totalDays = res.branch1Duration + res.branch2Duration;
+                      const q3Val = res.q3_consistency;
+                      const hasQ3 = q3Val !== null && q3Val !== undefined && q3Val > 0;
+                      const rowAvg = parseFloat(((res.q1_benefit + res.q2_apply_knowledge + (hasQ3 ? q3Val : 0)) / (hasQ3 ? 3 : 2)).toFixed(2));
+                      const totalDays = res.branch1Duration + (res.branch2Duration || 0);
 
                       return (
                         <tr key={res.id} onClick={() => setSelectedResponse(res)}>
                           <td>{formatDate(res.createdAt)}</td>
                           <td style={{ fontWeight: 500 }}>{res.department}</td>
                           <td style={{ fontWeight: 500 }}>{res.branch1}</td>
-                          <td style={{ fontWeight: 500 }}>{res.branch2}</td>
+                          <td style={{ fontWeight: 500 }}>{res.branch2 || '-'}</td>
                           <td style={{ textAlign: 'center' }}>{totalDays} วัน</td>
                           <td style={{ textAlign: 'center' }}>
                             <span className={`badge ${getRatingBadgeClass(rowAvg)}`} style={{ display: 'inline-flex', flexDirection: 'column', gap: '2px', padding: '6px 10px', minWidth: '80px' }}>
@@ -1319,7 +1327,7 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
               {/* Section 1 */}
               <div className="detail-sec">
                 <div className="detail-sec-title">ส่วนที่ 1: ข้อมูลการฝึกหน้าร้าน</div>
-                <div className="detail-grid">
+                <div className="detail-grid" style={{ gridTemplateColumns: selectedResponse.branch2 ? '1fr 1fr' : '1fr' }}>
                   <div className="branch-panel" style={{ borderLeft: '3px solid var(--primary-red)' }}>
                     <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--primary-red)', marginBottom: '8px' }}>สาขาที่ 1</div>
                     <div className="detail-item mb-2">
@@ -1342,27 +1350,29 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
                     </div>
                   </div>
 
-                  <div className="branch-panel" style={{ borderLeft: '3px solid var(--primary-yellow)' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--primary-yellow-hover)', marginBottom: '8px' }}>สาขาที่ 2</div>
-                    <div className="detail-item mb-2">
-                      <span className="detail-label">ชื่อสาขา</span>
-                      <span className="detail-val" style={{ fontSize: '14px' }}>{selectedResponse.branch2}</span>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      <div className="detail-item">
-                        <span className="detail-label">วันที่เริ่ม</span>
-                        <span className="detail-val">{new Date(selectedResponse.branch2TrainingStart).toLocaleDateString('th-TH')}</span>
+                  {selectedResponse.branch2 && (
+                    <div className="branch-panel" style={{ borderLeft: '3px solid var(--primary-yellow)' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--primary-yellow-hover)', marginBottom: '8px' }}>สาขาที่ 2</div>
+                      <div className="detail-item mb-2">
+                        <span className="detail-label">ชื่อสาขา</span>
+                        <span className="detail-val" style={{ fontSize: '14px' }}>{selectedResponse.branch2}</span>
                       </div>
-                      <div className="detail-item">
-                        <span className="detail-label">วันที่สิ้นสุด</span>
-                        <span className="detail-val">{new Date(selectedResponse.branch2TrainingEnd).toLocaleDateString('th-TH')}</span>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <div className="detail-item">
+                          <span className="detail-label">วันที่เริ่ม</span>
+                          <span className="detail-val">{selectedResponse.branch2TrainingStart ? new Date(selectedResponse.branch2TrainingStart).toLocaleDateString('th-TH') : '-'}</span>
+                        </div>
+                        <div className="detail-item">
+                          <span className="detail-label">วันที่สิ้นสุด</span>
+                          <span className="detail-val">{selectedResponse.branch2TrainingEnd ? new Date(selectedResponse.branch2TrainingEnd).toLocaleDateString('th-TH') : '-'}</span>
+                        </div>
+                      </div>
+                      <div className="detail-item mt-2">
+                        <span className="detail-label">ระยะเวลารวม</span>
+                        <span className="detail-val">{selectedResponse.branch2Duration !== null ? `${selectedResponse.branch2Duration} วัน` : '-'}</span>
                       </div>
                     </div>
-                    <div className="detail-item mt-2">
-                      <span className="detail-label">ระยะเวลารวม</span>
-                      <span className="detail-val">{selectedResponse.branch2Duration} วัน</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -1378,16 +1388,18 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
                     <span style={{ fontSize: '13px' }}>2. สามารถนำความรู้และทักษะที่ได้รับจากหน้าร้าน ไปปรับ/ประยุกต์ใช้กับการทำงานในสายงานที่ปฏิบัติได้</span>
                     <span className="badge badge-red" style={{ fontWeight: 600 }}>{selectedResponse.q2_apply_knowledge} คะแนน</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-                    <span style={{ fontSize: '13px' }}>3. แนวทางการปฏิบัติงานและคำแนะนำที่ได้รับจากทั้ง 2 สาขา เป็นไปในทิศทางเดียวกัน</span>
-                    <span className="badge badge-red" style={{ fontWeight: 600 }}>{selectedResponse.q3_consistency} คะแนน</span>
-                  </div>
+                  {selectedResponse.q3_consistency !== null && selectedResponse.q3_consistency !== undefined && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+                      <span style={{ fontSize: '13px' }}>3. แนวทางการปฏิบัติงานและคำแนะนำที่ได้รับจากทั้ง 2 สาขา เป็นไปในทิศทางเดียวกัน</span>
+                      <span className="badge badge-red" style={{ fontWeight: 600 }}>{selectedResponse.q3_consistency} คะแนน</span>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
                     <span style={{ fontSize: '13px' }}>4.1 ความเหมาะสมของระยะเวลา (5 วัน)</span>
                     <span className="badge badge-yellow" style={{ fontWeight: 600 }}>{selectedResponse.q4_1_duration_suitability}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '4px' }}>
-                    <span style={{ fontSize: '13px' }}>4.2 ความเหมาะสมของจำนวนสาขา (2 สาขา)</span>
+                    <span style={{ fontSize: '13px' }}>4.2 ความเหมาะสมของจำนวนสาขา ({selectedResponse.branch2 ? '2 สาขา' : '1 สาขา'})</span>
                     <span className="badge badge-yellow" style={{ fontWeight: 600 }}>{selectedResponse.q4_2_branches_suitability}</span>
                   </div>
                 </div>
@@ -1402,53 +1414,53 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
                     <tr>
                       <th>หัวข้อการประเมิน</th>
                       <th style={{ textAlign: 'center' }}>สาขา 1: {selectedResponse.branch1}</th>
-                      <th style={{ textAlign: 'center' }}>สาขา 2: {selectedResponse.branch2}</th>
+                      {selectedResponse.branch2 && <th style={{ textAlign: 'center' }}>สาขา 2: {selectedResponse.branch2}</th>}
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
                       <td style={{ fontWeight: 500 }}>หมวด ก: กระบวนการจัดการและวิธีการสอน</td>
-                      <td colSpan={2} style={{ backgroundColor: '#F8FAFC' }}></td>
+                      <td colSpan={selectedResponse.branch2 ? 2 : 1} style={{ backgroundColor: '#F8FAFC' }}></td>
                     </tr>
                     <tr>
                       <td style={{ paddingLeft: '24px' }}>5. การสอนในแต่ละส่วนงาน มีความชัดเจน เป็นลำดับขั้นตอน ไม่สับสน</td>
                       <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q5_clarity_branch1}</td>
-                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q5_clarity_branch2}</td>
+                      {selectedResponse.branch2 && <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q5_clarity_branch2}</td>}
                     </tr>
                     <tr>
                       <td style={{ paddingLeft: '24px' }}>6. ปริมาณเนื้อหาและงานที่ได้รับ มีความเหมาะสมกับเวลาที่กำหนดไว้</td>
                       <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q6_volume_branch1}</td>
-                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q6_volume_branch2}</td>
+                      {selectedResponse.branch2 && <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q6_volume_branch2}</td>}
                     </tr>
                     <tr>
                       <td style={{ paddingLeft: '24px' }}>7. การจัดเตรียมอุปกรณ์ เครื่องมือ หรือเอกสารการสอนพร้อมใช้งาน</td>
                       <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q7_readiness_branch1}</td>
-                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q7_readiness_branch2}</td>
+                      {selectedResponse.branch2 && <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q7_readiness_branch2}</td>}
                     </tr>
 
                     <tr>
                       <td style={{ fontWeight: 500 }}>หมวด ข: ทีมผู้จัดการ พี่เลี้ยง และทีมงานประจำสาขา</td>
-                      <td colSpan={2} style={{ backgroundColor: '#F8FAFC' }}></td>
+                      <td colSpan={selectedResponse.branch2 ? 2 : 1} style={{ backgroundColor: '#F8FAFC' }}></td>
                     </tr>
                     <tr>
                       <td style={{ paddingLeft: '24px' }}>8. พี่เลี้ยง/ผู้สอน มีความรู้ความเชี่ยวชาญ ถ่ายทอดเข้าใจง่าย</td>
                       <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q8_trainer_knowledge_branch1}</td>
-                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q8_trainer_knowledge_branch2}</td>
+                      {selectedResponse.branch2 && <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q8_trainer_knowledge_branch2}</td>}
                     </tr>
                     <tr>
                       <td style={{ paddingLeft: '24px' }}>9. พี่เลี้ยงมีการสอนเรื่องความปลอดภัยและสุขอนามัย (Food Safety)</td>
                       <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q9_safety_hygiene_branch1}</td>
-                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q9_safety_hygiene_branch2}</td>
+                      {selectedResponse.branch2 && <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q9_safety_hygiene_branch2}</td>}
                     </tr>
                     <tr>
                       <td style={{ paddingLeft: '24px' }}>10. พี่เลี้ยงมีความใส่ใจ เป็นมิตร และเปิดโอกาสให้ซักถาม</td>
                       <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q10_trainer_care_branch1}</td>
-                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q10_trainer_care_branch2}</td>
+                      {selectedResponse.branch2 && <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q10_trainer_care_branch2}</td>}
                     </tr>
                     <tr>
                       <td style={{ paddingLeft: '24px' }}>11. ภาพรวมทีมงานและบรรยากาศในสาขาต้อนรับและสนับสนุนการเรียนรู้</td>
                       <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q11_atmosphere_branch1}</td>
-                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q11_atmosphere_branch2}</td>
+                      {selectedResponse.branch2 && <td style={{ textAlign: 'center', fontWeight: 600 }}>{selectedResponse.q11_atmosphere_branch2}</td>}
                     </tr>
                   </tbody>
                 </table>

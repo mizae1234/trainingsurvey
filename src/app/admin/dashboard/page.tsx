@@ -48,8 +48,8 @@ export default async function AdminDashboardPage({
     createdAt: response.createdAt.toISOString(),
     branch1TrainingStart: response.branch1TrainingStart.toISOString(),
     branch1TrainingEnd: response.branch1TrainingEnd.toISOString(),
-    branch2TrainingStart: response.branch2TrainingStart.toISOString(),
-    branch2TrainingEnd: response.branch2TrainingEnd.toISOString(),
+    branch2TrainingStart: response.branch2TrainingStart ? response.branch2TrainingStart.toISOString() : null,
+    branch2TrainingEnd: response.branch2TrainingEnd ? response.branch2TrainingEnd.toISOString() : null,
   }));
 
   const serializedUser = {

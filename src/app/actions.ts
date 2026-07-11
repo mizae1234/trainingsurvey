@@ -34,8 +34,16 @@ function calculateDuration(start: Date, end: Date, holidayDates: Set<string>) {
 export async function submitSurvey(data: any) {
   try {
     // Basic validation
-    if (!data.department || !data.branch1 || !data.branch2) {
+    if (!data.department || !data.branch1) {
       return { success: false, error: 'กรุณากรอกข้อมูลและเลือกสาขาให้ครบถ้วน' };
+    }
+
+    // If branch 2 is specified, validate it
+    const hasBranch2 = !!(data.branch2 && data.branch2.trim());
+    if (hasBranch2) {
+      if (!data.branch2TrainingStart || !data.branch2TrainingEnd) {
+        return { success: false, error: 'กรุณาระบุวันเริ่มต้นและสิ้นสุดฝึกหน้าร้านสำหรับสาขาที่ 2' };
+      }
     }
 
     // Capture client metadata
@@ -57,8 +65,8 @@ export async function submitSurvey(data: any) {
 
     const b1Start = new Date(data.branch1TrainingStart);
     const b1End = new Date(data.branch1TrainingEnd);
-    const b2Start = new Date(data.branch2TrainingStart);
-    const b2End = new Date(data.branch2TrainingEnd);
+    const b2Start = hasBranch2 ? new Date(data.branch2TrainingStart) : null;
+    const b2End = hasBranch2 ? new Date(data.branch2TrainingEnd) : null;
 
     const parsedData = {
       ipAddress,
@@ -69,38 +77,38 @@ export async function submitSurvey(data: any) {
       branch1TrainingEnd: b1End,
       branch1Duration: calculateDuration(b1Start, b1End, holidayDatesSet),
       
-      branch2: data.branch2,
+      branch2: hasBranch2 ? data.branch2 : null,
       branch2TrainingStart: b2Start,
       branch2TrainingEnd: b2End,
-      branch2Duration: calculateDuration(b2Start, b2End, holidayDatesSet),
+      branch2Duration: (b2Start && b2End) ? calculateDuration(b2Start, b2End, holidayDatesSet) : null,
       
       q1_benefit: parseInt(data.q1_benefit) || 4,
       q2_apply_knowledge: parseInt(data.q2_apply_knowledge) || 4,
-      q3_consistency: parseInt(data.q3_consistency) || 4,
+      q3_consistency: hasBranch2 ? (parseInt(data.q3_consistency) || 4) : null,
       
       q4_1_duration_suitability: data.q4_1_duration_suitability || 'มีความเหมาะสม',
       q4_2_branches_suitability: data.q4_2_branches_suitability || 'มีความเหมาะสม',
       
       q5_clarity_branch1: parseInt(data.q5_clarity_branch1) || 4,
-      q5_clarity_branch2: parseInt(data.q5_clarity_branch2) || 4,
+      q5_clarity_branch2: hasBranch2 ? (parseInt(data.q5_clarity_branch2) || 4) : null,
       
       q6_volume_branch1: parseInt(data.q6_volume_branch1) || 4,
-      q6_volume_branch2: parseInt(data.q6_volume_branch2) || 4,
+      q6_volume_branch2: hasBranch2 ? (parseInt(data.q6_volume_branch2) || 4) : null,
       
       q7_readiness_branch1: parseInt(data.q7_readiness_branch1) || 4,
-      q7_readiness_branch2: parseInt(data.q7_readiness_branch2) || 4,
+      q7_readiness_branch2: hasBranch2 ? (parseInt(data.q7_readiness_branch2) || 4) : null,
       
       q8_trainer_knowledge_branch1: parseInt(data.q8_trainer_knowledge_branch1) || 4,
-      q8_trainer_knowledge_branch2: parseInt(data.q8_trainer_knowledge_branch2) || 4,
+      q8_trainer_knowledge_branch2: hasBranch2 ? (parseInt(data.q8_trainer_knowledge_branch2) || 4) : null,
       
       q9_safety_hygiene_branch1: parseInt(data.q9_safety_hygiene_branch1) || 4,
-      q9_safety_hygiene_branch2: parseInt(data.q9_safety_hygiene_branch2) || 4,
+      q9_safety_hygiene_branch2: hasBranch2 ? (parseInt(data.q9_safety_hygiene_branch2) || 4) : null,
       
       q10_trainer_care_branch1: parseInt(data.q10_trainer_care_branch1) || 4,
-      q10_trainer_care_branch2: parseInt(data.q10_trainer_care_branch2) || 4,
+      q10_trainer_care_branch2: hasBranch2 ? (parseInt(data.q10_trainer_care_branch2) || 4) : null,
       
       q11_atmosphere_branch1: parseInt(data.q11_atmosphere_branch1) || 4,
-      q11_atmosphere_branch2: parseInt(data.q11_atmosphere_branch2) || 4,
+      q11_atmosphere_branch2: hasBranch2 ? (parseInt(data.q11_atmosphere_branch2) || 4) : null,
       
       feedback12_challenging: data.feedback12_challenging || '',
       feedback13_ideal_setup: data.feedback13_ideal_setup || '',

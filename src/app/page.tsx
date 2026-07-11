@@ -49,6 +49,7 @@ export default function SurveyPage() {
 
   // Form State
   const [formData, setFormData] = useState({
+    branchCount: '2',
     department: '',
     branch1: '',
     branch1TrainingStart: '',
@@ -197,44 +198,51 @@ export default function SurveyPage() {
         newErrors.branch1TrainingEnd = 'วันสิ้นสุดการฝึกหน้าร้านต้องอยู่หลังวันเริ่มต้น';
       }
 
-      if (!formData.branch2) newErrors.branch2 = 'กรุณาเลือกสาขาที่ 2';
-      if (!formData.branch2TrainingStart) newErrors.branch2TrainingStart = 'กรุณาระบุวันเริ่มต้นฝึกหน้าร้าน';
-      if (!formData.branch2TrainingEnd) newErrors.branch2TrainingEnd = 'กรุณาระบุวันสิ้นสุดฝึกหน้าร้าน';
+      if (formData.branchCount === '2') {
+        if (!formData.branch2) newErrors.branch2 = 'กรุณาเลือกสาขาที่ 2';
+        if (!formData.branch2TrainingStart) newErrors.branch2TrainingStart = 'กรุณาระบุวันเริ่มต้นฝึกหน้าร้าน';
+        if (!formData.branch2TrainingEnd) newErrors.branch2TrainingEnd = 'กรุณาระบุวันสิ้นสุดฝึกหน้าร้าน';
 
-      const start2 = new Date(formData.branch2TrainingStart);
-      const end2 = new Date(formData.branch2TrainingEnd);
-      if (formData.branch2TrainingStart && formData.branch2TrainingEnd && end2 < start2) {
-        newErrors.branch2TrainingEnd = 'วันสิ้นสุดการฝึกหน้าร้านต้องอยู่หลังวันเริ่มต้น';
-      }
+        const start2 = new Date(formData.branch2TrainingStart);
+        const end2 = new Date(formData.branch2TrainingEnd);
+        if (formData.branch2TrainingStart && formData.branch2TrainingEnd && end2 < start2) {
+          newErrors.branch2TrainingEnd = 'วันสิ้นสุดการฝึกหน้าร้านต้องอยู่หลังวันเริ่มต้น';
+        }
 
-      if (formData.branch1 && formData.branch2 && formData.branch1 === formData.branch2) {
-        newErrors.branch2 = 'กรุณาเลือกสาขาที่ไม่ซ้ำกัน';
+        if (formData.branch1 && formData.branch2 && formData.branch1 === formData.branch2) {
+          newErrors.branch2 = 'กรุณาเลือกสาขาที่ไม่ซ้ำกัน';
+        }
       }
     }
 
     if (currentStep === 2) {
       if (formData.q1_benefit === 0) newErrors.q1_benefit = 'กรุณาประเมินระดับความพึงพอใจ';
       if (formData.q2_apply_knowledge === 0) newErrors.q2_apply_knowledge = 'กรุณาประเมินระดับความพึงพอใจ';
-      if (formData.q3_consistency === 0) newErrors.q3_consistency = 'กรุณาประเมินระดับความพึงพอใจ';
+      if (formData.branchCount === '2' && formData.q3_consistency === 0) {
+        newErrors.q3_consistency = 'กรุณาประเมินระดับความพึงพอใจ';
+      }
       if (!formData.q4_1_duration_suitability) newErrors.q4_1_duration_suitability = 'กรุณาเลือกความเหมาะสมของระยะเวลา';
       if (!formData.q4_2_branches_suitability) newErrors.q4_2_branches_suitability = 'กรุณาเลือกความเหมาะสมของจำนวนสาขา';
     }
 
     if (currentStep === 3) {
       if (formData.q5_clarity_branch1 === 0) newErrors.q5_clarity_branch1 = 'กรุณาเลือกประเมินสาขาที่ 1';
-      if (formData.q5_clarity_branch2 === 0) newErrors.q5_clarity_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
       if (formData.q6_volume_branch1 === 0) newErrors.q6_volume_branch1 = 'กรุณาเลือกประเมินสาขาที่ 1';
-      if (formData.q6_volume_branch2 === 0) newErrors.q6_volume_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
       if (formData.q7_readiness_branch1 === 0) newErrors.q7_readiness_branch1 = 'กรุณาเลือกประเมินสาขาที่ 1';
-      if (formData.q7_readiness_branch2 === 0) newErrors.q7_readiness_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
       if (formData.q8_trainer_knowledge_branch1 === 0) newErrors.q8_trainer_knowledge_branch1 = 'กรุณาเลือกประเมินสาขาที่ 1';
-      if (formData.q8_trainer_knowledge_branch2 === 0) newErrors.q8_trainer_knowledge_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
       if (formData.q9_safety_hygiene_branch1 === 0) newErrors.q9_safety_hygiene_branch1 = 'กรุณาเลือกประเมินสาขาที่ 1';
-      if (formData.q9_safety_hygiene_branch2 === 0) newErrors.q9_safety_hygiene_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
       if (formData.q10_trainer_care_branch1 === 0) newErrors.q10_trainer_care_branch1 = 'กรุณาเลือกประเมินสาขาที่ 1';
-      if (formData.q10_trainer_care_branch2 === 0) newErrors.q10_trainer_care_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
       if (formData.q11_atmosphere_branch1 === 0) newErrors.q11_atmosphere_branch1 = 'กรุณาเลือกประเมินสาขาที่ 1';
-      if (formData.q11_atmosphere_branch2 === 0) newErrors.q11_atmosphere_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
+
+      if (formData.branchCount === '2') {
+        if (formData.q5_clarity_branch2 === 0) newErrors.q5_clarity_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
+        if (formData.q6_volume_branch2 === 0) newErrors.q6_volume_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
+        if (formData.q7_readiness_branch2 === 0) newErrors.q7_readiness_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
+        if (formData.q8_trainer_knowledge_branch2 === 0) newErrors.q8_trainer_knowledge_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
+        if (formData.q9_safety_hygiene_branch2 === 0) newErrors.q9_safety_hygiene_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
+        if (formData.q10_trainer_care_branch2 === 0) newErrors.q10_trainer_care_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
+        if (formData.q11_atmosphere_branch2 === 0) newErrors.q11_atmosphere_branch2 = 'กรุณาเลือกประเมินสาขาที่ 2';
+      }
     }
 
     if (currentStep === 4) {
@@ -381,6 +389,60 @@ export default function SurveyPage() {
                   <div className="section-desc">ระบุรายละเอียดสาขาและวันที่เข้ารับการฝึกปฏิบัติงานจริง</div>
                 </div>
 
+                {/* Branch Count Selection */}
+                <div className="form-group" style={{ marginBottom: '28px' }}>
+                  <label className="form-label" style={{ fontWeight: 600 }}>จำนวนสาขาที่ท่านเข้ารับการฝึกปฏิบัติงานจริง <span>*</span></label>
+                  <div className="horizontal-choices">
+                    {[
+                      { label: '1 สาขา', value: '1' },
+                      { label: '2 สาขา', value: '2' }
+                    ].map(item => (
+                      <div
+                        key={item.value}
+                        className={`choice-box ${formData.branchCount === item.value ? 'selected' : ''}`}
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            branchCount: item.value,
+                            ...(item.value === '1' ? {
+                              branch2: '',
+                              branch2TrainingStart: '',
+                              branch2TrainingEnd: '',
+                              branch2Duration: '',
+                              q3_consistency: 0,
+                              q5_clarity_branch2: 0,
+                              q6_volume_branch2: 0,
+                              q7_readiness_branch2: 0,
+                              q8_trainer_knowledge_branch2: 0,
+                              q9_safety_hygiene_branch2: 0,
+                              q10_trainer_care_branch2: 0,
+                              q11_atmosphere_branch2: 0
+                            } : {})
+                          }));
+                          // Clear errors for branch 2
+                          setErrors(prev => {
+                            const newErrors = { ...prev };
+                            delete newErrors.branch2;
+                            delete newErrors.branch2TrainingStart;
+                            delete newErrors.branch2TrainingEnd;
+                            delete newErrors.q3_consistency;
+                            delete newErrors.q5_clarity_branch2;
+                            delete newErrors.q6_volume_branch2;
+                            delete newErrors.q7_readiness_branch2;
+                            delete newErrors.q8_trainer_knowledge_branch2;
+                            delete newErrors.q9_safety_hygiene_branch2;
+                            delete newErrors.q10_trainer_care_branch2;
+                            delete newErrors.q11_atmosphere_branch2;
+                            return newErrors;
+                          });
+                        }}
+                      >
+                        {item.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Branch 1 */}
                 <div className="branch-panel mb-4">
                   <div className="branch-panel-title">
@@ -431,53 +493,55 @@ export default function SurveyPage() {
                 </div>
 
                 {/* Branch 2 */}
-                <div className="branch-panel">
-                  <div className="branch-panel-title">
-                    <span className="badge badge-yellow">การฝึกหน้าร้านสาขาที่ 2</span>
-                  </div>
-
-                  <div className="form-group">
-                    <BranchSelect
-                      id="branch2"
-                      label={<>สาขาที่ 2 ที่เข้าฝึกหน้าร้าน <span>*</span></>}
-                      value={formData.branch2}
-                      onChange={(val) => setFormData(prev => ({ ...prev, branch2: val }))}
-                      error={errors.branch2}
-                    />
-                  </div>
-
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label className="form-label">ช่วงวันที่เข้ารับการฝึกหน้าร้าน <span>*</span></label>
-                      <div className="date-picker-group">
-                        <DatePicker
-                          value={formData.branch2TrainingStart}
-                          onChange={(val) => setFormData(prev => ({ ...prev, branch2TrainingStart: val }))}
-                        />
-                        <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>ถึง</span>
-                        <DatePicker
-                          value={formData.branch2TrainingEnd}
-                          onChange={(val) => setFormData(prev => ({ ...prev, branch2TrainingEnd: val }))}
-                        />
-                      </div>
-                      {(errors.branch2TrainingStart || errors.branch2TrainingEnd) && (
-                        <span className="error-text">{errors.branch2TrainingStart || errors.branch2TrainingEnd}</span>
-                      )}
+                {formData.branchCount === '2' && (
+                  <div className="branch-panel">
+                    <div className="branch-panel-title">
+                      <span className="badge badge-yellow">การฝึกหน้าร้านสาขาที่ 2</span>
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label">รวมระยะเวลา (วัน)</label>
-                      <input
-                        type="number"
-                        className="form-input"
-                        value={formData.branch2Duration}
-                        onChange={(e) => setFormData(prev => ({ ...prev, branch2Duration: e.target.value }))}
-                        placeholder="คำนวณอัตโนมัติ"
-                        readOnly
+                      <BranchSelect
+                        id="branch2"
+                        label={<>สาขาที่ 2 ที่เข้าฝึกหน้าร้าน <span>*</span></>}
+                        value={formData.branch2}
+                        onChange={(val) => setFormData(prev => ({ ...prev, branch2: val }))}
+                        error={errors.branch2}
                       />
                     </div>
+
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label className="form-label">ช่วงวันที่เข้ารับการฝึกหน้าร้าน <span>*</span></label>
+                        <div className="date-picker-group">
+                          <DatePicker
+                            value={formData.branch2TrainingStart}
+                            onChange={(val) => setFormData(prev => ({ ...prev, branch2TrainingStart: val }))}
+                          />
+                          <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>ถึง</span>
+                          <DatePicker
+                            value={formData.branch2TrainingEnd}
+                            onChange={(val) => setFormData(prev => ({ ...prev, branch2TrainingEnd: val }))}
+                          />
+                        </div>
+                        {(errors.branch2TrainingStart || errors.branch2TrainingEnd) && (
+                          <span className="error-text">{errors.branch2TrainingStart || errors.branch2TrainingEnd}</span>
+                        )}
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">รวมระยะเวลา (วัน)</label>
+                        <input
+                          type="number"
+                          className="form-input"
+                          value={formData.branch2Duration}
+                          onChange={(e) => setFormData(prev => ({ ...prev, branch2Duration: e.target.value }))}
+                          placeholder="คำนวณอัตโนมัติ"
+                          readOnly
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -536,30 +600,32 @@ export default function SurveyPage() {
                 </div>
 
                 {/* Q3 */}
-                <div className="question-row">
-                  <div className="question-text">
-                    3. แนวทางการปฏิบัติงานและคำแนะนำที่ได้รับจากทั้ง 2 สาขา เป็นไปในทิศทางเดียวกัน <span>*</span>
+                {formData.branchCount === '2' && (
+                  <div className="question-row">
+                    <div className="question-text">
+                      3. แนวทางการปฏิบัติงานและคำแนะนำที่ได้รับจากทั้ง 2 สาขา เป็นไปในทิศทางเดียวกัน <span>*</span>
+                    </div>
+                    <div className="rating-group">
+                      {[4, 3, 2, 1].map(num => (
+                        <div
+                          key={num}
+                          className={`rating-box ${formData.q3_consistency === num ? 'selected' : ''}`}
+                          onClick={() => setRating('q3_consistency', num)}
+                        >
+                          <span className="rating-number">{num}</span>
+                          <span className="rating-label">{sec2RatingLabels[num]}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {errors.q3_consistency && (
+                      <span className="error-text" style={{ marginTop: '8px' }}>{errors.q3_consistency}</span>
+                    )}
                   </div>
-                  <div className="rating-group">
-                    {[4, 3, 2, 1].map(num => (
-                      <div
-                        key={num}
-                        className={`rating-box ${formData.q3_consistency === num ? 'selected' : ''}`}
-                        onClick={() => setRating('q3_consistency', num)}
-                      >
-                        <span className="rating-number">{num}</span>
-                        <span className="rating-label">{sec2RatingLabels[num]}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {errors.q3_consistency && (
-                    <span className="error-text" style={{ marginTop: '8px' }}>{errors.q3_consistency}</span>
-                  )}
-                </div>
+                )}
 
                 {/* Q4 */}
                 <div style={{ marginTop: '28px', marginBottom: '16px' }} className="question-text">
-                  4. ความเหมาะสมของ "ระยะเวลา 5 วัน กับการเรียนรู้ใน 2 สาขา"
+                  4. ความเหมาะสมของ "ระยะเวลา 5 วัน กับการเรียนรู้ใน {formData.branchCount} สาขา"
                 </div>
 
                 {/* Q4.1 */}
@@ -612,348 +678,102 @@ export default function SurveyPage() {
                   </div>
                 </div>
 
-                <div className="branch-comp-headers mb-4" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="branch-comp-headers mb-4" style={{ display: 'grid', gridTemplateColumns: formData.branchCount === '1' ? '1fr' : '1fr 1fr', gap: '16px' }}>
                   <div className="text-center" style={{ padding: '8px', backgroundColor: 'var(--red-tint)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>สาขาที่ 1</div>
                     <div className="branch-panel-name" style={{ fontSize: '13px' }}>{formData.branch1}</div>
                   </div>
-                  <div className="text-center" style={{ padding: '8px', backgroundColor: 'var(--yellow-tint)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>สาขาที่ 2</div>
-                    <div className="branch-panel-name" style={{ fontSize: '13px', color: 'var(--primary-yellow-hover)' }}>{formData.branch2}</div>
-                  </div>
+                  {formData.branchCount === '2' && (
+                    <div className="text-center" style={{ padding: '8px', backgroundColor: 'var(--yellow-tint)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>สาขาที่ 2</div>
+                      <div className="branch-panel-name" style={{ fontSize: '13px', color: 'var(--primary-yellow-hover)' }}>{formData.branch2}</div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Subtitle A */}
-                <h3 className="section-title" style={{ fontSize: '14px', margin: '24px 0 16px 0', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
-                  หมวด ก: กระบวนการจัดการและวิธีการสอน
-                </h3>
+                {[
+                  {
+                    category: 'หมวด ก: กระบวนการจัดการและวิธีการสอน',
+                    questions: [
+                      { id: 5, prefix: 'q5_clarity', text: '5. การสอนในแต่ละส่วนงาน มีความชัดเจน เป็นลำดับขั้นตอน ไม่สับสน' },
+                      { id: 6, prefix: 'q6_volume', text: '6. ปริมาณเนื้อหาและงานที่ได้รับ มีความเหมาะสมกับเวลาที่กำหนดไว้' },
+                      { id: 7, prefix: 'q7_readiness', text: '7. สาขามีการจัดเตรียมอุปกรณ์เครื่องมือ หรือเอกสารประกอบการสอนไว้ให้อย่างพร้อมใช้งาน' }
+                    ]
+                  },
+                  {
+                    category: 'หมวด ข: คุณภาพของทีมผู้จัดการ พี่เลี้ยงและทีมงานประจำสาขา',
+                    questions: [
+                      { id: 8, prefix: 'q8_trainer_knowledge', text: '8. พี่เลี้ยง/ผู้สอน มีความรู้ ความเชี่ยวชาญ สามารถอธิบาย/ถ่ายทอดเนื้อหาได้อย่างเข้าใจ' },
+                      { id: 9, prefix: 'q9_safety_hygiene', text: '9. พี่เลี้ยง/ผู้สอนได้อธิบายและให้ความสำคัญเรื่องความปลอดภัยหน้างานและมาตรฐานสุขอนามัย (Food Safety)' },
+                      { id: 10, prefix: 'q10_trainer_care', text: '10. พี่เลี้ยง/ผู้สอน มีความใส่ใจ เป็นมิตร และเปิดโอกาสให้สอบถามข้อสงสัย' },
+                      { id: 11, prefix: 'q11_atmosphere', text: '11. ภาพรวมทีมงานและบรรยากาศในสาขา ให้การต้อนรับและสนับสนุนการเรียนรู้ของท่าน' }
+                    ]
+                  }
+                ].map((cat, catIdx) => (
+                  <React.Fragment key={catIdx}>
+                    <h3 className="section-title" style={{ fontSize: '14px', margin: catIdx === 0 ? '24px 0 16px 0' : '32px 0 16px 0', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
+                      {cat.category}
+                    </h3>
+                    
+                    {cat.questions.map(q => {
+                      const field1 = `${q.prefix}_branch1`;
+                      const field2 = `${q.prefix}_branch2`;
+                      const val1 = formData[field1 as keyof typeof formData] as number;
+                      const val2 = formData[field2 as keyof typeof formData] as number;
+                      const err1 = errors[field1];
+                      const err2 = errors[field2];
 
-                {/* Q5 */}
-                <div className="question-row">
-                  <div className="question-text">5. การสอนในแต่ละส่วนงาน มีความชัดเจน เป็นลำดับขั้นตอน ไม่สับสน <span>*</span></div>
-                  <div className="branch-comp-grid">
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 1: {formData.branch1}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q5_clarity_branch1 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q5_clarity_branch1', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
+                      return (
+                        <div className="question-row" key={q.id}>
+                          <div className="question-text">{q.text} <span>*</span></div>
+                          <div className="branch-comp-grid" style={{ gridTemplateColumns: formData.branchCount === '1' ? '1fr' : '1fr 1fr', gap: '16px' }}>
+                            <div>
+                              <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 1: {formData.branch1}</div>
+                              <div className="rating-group">
+                                {[4, 3, 2, 1].map(num => (
+                                  <div
+                                    key={num}
+                                    className={`rating-box ${val1 === num ? 'selected' : ''}`}
+                                    onClick={() => setRating(field1, num)}
+                                    style={{ padding: '8px 4px' }}
+                                  >
+                                    <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
+                                    <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              {err1 && (
+                                <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{err1}</span>
+                              )}
+                            </div>
+
+                            {formData.branchCount === '2' && (
+                              <div>
+                                <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 2: {formData.branch2}</div>
+                                <div className="rating-group">
+                                  {[4, 3, 2, 1].map(num => (
+                                    <div
+                                      key={num}
+                                      className={`rating-box ${val2 === num ? 'selected' : ''}`}
+                                      onClick={() => setRating(field2, num)}
+                                      style={{ padding: '8px 4px' }}
+                                    >
+                                      <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
+                                      <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                                {err2 && (
+                                  <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{err2}</span>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        ))}
-                      </div>
-                      {errors.q5_clarity_branch1 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q5_clarity_branch1}</span>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 2: {formData.branch2}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q5_clarity_branch2 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q5_clarity_branch2', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q5_clarity_branch2 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q5_clarity_branch2}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Q6 */}
-                <div className="question-row">
-                  <div className="question-text">6. ปริมาณเนื้อหาและงานที่ได้รับ มีความเหมาะสมกับเวลาที่กำหนดไว้ <span>*</span></div>
-                  <div className="branch-comp-grid">
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 1: {formData.branch1}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q6_volume_branch1 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q6_volume_branch1', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q6_volume_branch1 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q6_volume_branch1}</span>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 2: {formData.branch2}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q6_volume_branch2 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q6_volume_branch2', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q6_volume_branch2 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q6_volume_branch2}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Q7 */}
-                <div className="question-row">
-                  <div className="question-text">7. สาขามีการจัดเตรียมอุปกรณ์เครื่องมือ หรือเอกสารประกอบการสอนไว้ให้อย่างพร้อมใช้งาน <span>*</span></div>
-                  <div className="branch-comp-grid">
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 1: {formData.branch1}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q7_readiness_branch1 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q7_readiness_branch1', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q7_readiness_branch1 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q7_readiness_branch1}</span>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 2: {formData.branch2}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q7_readiness_branch2 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q7_readiness_branch2', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q7_readiness_branch2 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q7_readiness_branch2}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Subtitle B */}
-                <h3 className="section-title" style={{ fontSize: '14px', margin: '32px 0 16px 0', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
-                  หมวด ข: คุณภาพของทีมผู้จัดการ พี่เลี้ยงและทีมงานประจำสาขา
-                </h3>
-
-                {/* Q8 */}
-                <div className="question-row">
-                  <div className="question-text">8. พี่เลี้ยง/ผู้สอน มีความรู้ ความเชี่ยวชาญ สามารถอธิบาย/ถ่ายทอดเนื้อหาได้อย่างเข้าใจ <span>*</span></div>
-                  <div className="branch-comp-grid">
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 1: {formData.branch1}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q8_trainer_knowledge_branch1 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q8_trainer_knowledge_branch1', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q8_trainer_knowledge_branch1 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q8_trainer_knowledge_branch1}</span>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 2: {formData.branch2}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q8_trainer_knowledge_branch2 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q8_trainer_knowledge_branch2', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q8_trainer_knowledge_branch2 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q8_trainer_knowledge_branch2}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Q9 */}
-                <div className="question-row">
-                  <div className="question-text">9. พี่เลี้ยง/ผู้สอนได้อธิบายและให้ความสำคัญเรื่องความปลอดภัยหน้างานและมาตรฐานสุขอนามัย (Food Safety) <span>*</span></div>
-                  <div className="branch-comp-grid">
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 1: {formData.branch1}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q9_safety_hygiene_branch1 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q9_safety_hygiene_branch1', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q9_safety_hygiene_branch1 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q9_safety_hygiene_branch1}</span>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 2: {formData.branch2}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q9_safety_hygiene_branch2 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q9_safety_hygiene_branch2', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q9_safety_hygiene_branch2 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q9_safety_hygiene_branch2}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Q10 */}
-                <div className="question-row">
-                  <div className="question-text">10. พี่เลี้ยง/ผู้สอน มีความใส่ใจ เป็นมิตร และเปิดโอกาสให้สอบถามข้อสงสัย <span>*</span></div>
-                  <div className="branch-comp-grid">
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 1: {formData.branch1}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q10_trainer_care_branch1 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q10_trainer_care_branch1', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q10_trainer_care_branch1 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q10_trainer_care_branch1}</span>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 2: {formData.branch2}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q10_trainer_care_branch2 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q10_trainer_care_branch2', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q10_trainer_care_branch2 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q10_trainer_care_branch2}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Q11 */}
-                <div className="question-row">
-                  <div className="question-text">11. ภาพรวมทีมงานและบรรยากาศในสาขา ให้การต้อนรับและสนับสนุนการเรียนรู้ของท่าน <span>*</span></div>
-                  <div className="branch-comp-grid">
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 1: {formData.branch1}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q11_atmosphere_branch1 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q11_atmosphere_branch1', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q11_atmosphere_branch1 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q11_atmosphere_branch1}</span>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="branch-panel-title" style={{ fontSize: '11px', marginBottom: '6px' }}>สาขา 2: {formData.branch2}</div>
-                      <div className="rating-group">
-                        {[4, 3, 2, 1].map(num => (
-                          <div
-                            key={num}
-                            className={`rating-box ${formData.q11_atmosphere_branch2 === num ? 'selected' : ''}`}
-                            onClick={() => setRating('q11_atmosphere_branch2', num)}
-                            style={{ padding: '8px 4px' }}
-                          >
-                            <span className="rating-number" style={{ fontSize: '14px' }}>{num}</span>
-                            <span className="rating-label" style={{ fontSize: '9px' }}>{sec3RatingLabels[num]}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.q11_atmosphere_branch2 && (
-                        <span className="error-text" style={{ marginTop: '6px', fontSize: '11px' }}>{errors.q11_atmosphere_branch2}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                        </div>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
               </div>
             )}
 
@@ -1083,6 +903,7 @@ export default function SurveyPage() {
                   onClick={() => {
                     // Reset form and go back to step 1
                     setFormData({
+                      branchCount: '2',
                       department: '',
                       branch1: '',
                       branch1TrainingStart: '',
