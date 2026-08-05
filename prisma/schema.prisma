@@ -117,16 +117,21 @@ model BuddyTask {
 }
 
 model MotherDayActivity {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  firstName String
-  lastName  String
-  nickname  String
-  position  String
-  branch    String
-  imageUrl  String
-  ipAddress String?
-  userAgent String?
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  employeeId String   @unique
+  firstName  String
+  lastName   String
+  branchCode String?
+  branch     String
+  message    String?
+  imageUrl   String
+  ipAddress  String?
+  userAgent  String?
+}
 
-  @@unique([firstName, lastName])
+model Branch {
+  id   String @id @default(uuid())
+  code String @unique
+  name String
 }

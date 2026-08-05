@@ -7,47 +7,46 @@ import { headers } from 'next/headers';
 
 export async function submitMotherDay(formData: FormData) {
   try {
+    const employeeId = formData.get('employeeId') as string;
     const firstName = formData.get('firstName') as string;
     const lastName = formData.get('lastName') as string;
-    const nickname = formData.get('nickname') as string;
-    const position = formData.get('position') as string;
     const branch = formData.get('branch') as string;
+    const message = formData.get('message') as string;
     const file = formData.get('file') as File;
 
-    if (!firstName || !lastName || !nickname || !position || !branch || !file) {
+    if (!employeeId || !firstName || !lastName || !branch || !file) {
       return { success: false, error: 'กรุณากรอกข้อมูลให้ครบถ้วนและอัปโหลดรูปภาพ' };
     }
 
     // Clean inputs
+    const cleanEmployeeId = employeeId.trim();
     const cleanFirstName = firstName.trim();
     const cleanLastName = lastName.trim();
-    const cleanNickname = nickname.trim();
-    const cleanPosition = position.trim();
-    const cleanBranch = branch.trim();
+    const branchCode = branch.trim();
+    const cleanMessage = message ? message.trim() : '';
+
+    // Resolve branch name from master table
+    const branchRecord = await db.branch.findUnique({
+      where: { code: branchCode },
+    });
+    const cleanBranch = branchRecord ? branchRecord.name : branchCode;
 
     // 1. Check if already submitted in DB
     const existing = await db.motherDayActivity.findUnique({
-      where: {
-        firstName_lastName: {
-          firstName: cleanFirstName,
-          lastName: cleanLastName
-        }
-      }
+      where: { employeeId: cleanEmployeeId }
     });
 
     if (existing) {
       return { 
         success: false, 
-        error: 'คุณได้อัปโหลดรูปภาพเข้าร่วมกิจกรรมเรียบร้อยแล้ว (จำกัดสิทธิ์ 1 คนต่อ 1 รูปภาพ)' 
+        error: 'รหัสพนักงานนี้ได้ส่งภาพเข้าร่วมกิจกรรมเรียบร้อยแล้ว (จำกัดสิทธิ์ 1 คนต่อ 1 รูปภาพ)' 
       };
     }
 
-    // 2. Prepare file name
+    // 2. Prepare file name: รหัสพนักงาน_ชื่อ_สกุล
     const originalName = file.name || 'image.jpg';
     const fileExtension = originalName.split('.').pop()?.toLowerCase() || 'jpg';
-    
-    // Format name: ชื่อ_นามสกุล
-    const fileName = `${cleanFirstName}_${cleanLastName}.${fileExtension}`;
+    const fileName = `${cleanEmployeeId}_${cleanFirstName}_${cleanLastName}.${fileExtension}`;
     const key = `motherday/${fileName}`;
 
     // Read file buffer
@@ -79,11 +78,12 @@ export async function submitMotherDay(formData: FormData) {
     // 4. Save to database
     const newSubmission = await db.motherDayActivity.create({
       data: {
+        employeeId: cleanEmployeeId,
         firstName: cleanFirstName,
         lastName: cleanLastName,
-        nickname: cleanNickname,
-        position: cleanPosition,
+        branchCode,
         branch: cleanBranch,
+        message: cleanMessage || null,
         imageUrl,
         ipAddress,
         userAgent,
@@ -94,11 +94,11 @@ export async function submitMotherDay(formData: FormData) {
       success: true, 
       data: {
         id: newSubmission.id,
+        employeeId: cleanEmployeeId,
         firstName: cleanFirstName,
         lastName: cleanLastName,
-        nickname: cleanNickname,
-        position: cleanPosition,
         branch: cleanBranch,
+        message: cleanMessage,
         imageUrl
       }
     };

@@ -12,8 +12,9 @@ import {
   Image as ImageIcon, 
   Calendar, 
   User, 
-  Briefcase, 
+  Hash, 
   MapPin, 
+  MessageCircle,
   ExternalLink,
   ChevronLeft,
   X
@@ -22,11 +23,12 @@ import {
 interface Submission {
   id: string;
   createdAt: string;
+  employeeId: string;
   firstName: string;
   lastName: string;
-  nickname: string;
-  position: string;
+  branchCode: string | null;
   branch: string;
+  message: string | null;
   imageUrl: string;
   ipAddress: string | null;
   userAgent: string | null;
@@ -48,11 +50,11 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
     const term = searchTerm.toLowerCase().trim();
     if (!term) return true;
     return (
+      sub.employeeId.toLowerCase().includes(term) ||
       sub.firstName.toLowerCase().includes(term) ||
       sub.lastName.toLowerCase().includes(term) ||
-      sub.nickname.toLowerCase().includes(term) ||
-      sub.position.toLowerCase().includes(term) ||
-      sub.branch.toLowerCase().includes(term)
+      sub.branch.toLowerCase().includes(term) ||
+      (sub.message || '').toLowerCase().includes(term)
     );
   });
 
@@ -74,11 +76,12 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
       'ลำดับ',
       'วันที่ส่งข้อมูล',
       'เวลาที่ส่งข้อมูล',
-      'ชื่อจริง',
+      'รหัสพนักงาน',
+      'ชื่อ',
       'นามสกุล',
-      'ชื่อเล่น',
-      'ตำแหน่ง',
+      'รหัสสาขา',
       'สาขา',
+      'ข้อความถึงแม่',
       'ลิงก์รูปภาพ R2',
       'IP Address',
       'User Agent'
@@ -86,14 +89,12 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
 
     const dataRows = filteredSubmissions.map((sub, index) => {
       const dateObj = new Date(sub.createdAt);
-      // Format date in Thai format: DD/MM/YYYY
       const dateStr = dateObj.toLocaleDateString('th-TH', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         timeZone: 'Asia/Bangkok'
       });
-      // Format time: HH:MM:SS
       const timeStr = dateObj.toLocaleTimeString('th-TH', {
         hour: '2-digit',
         minute: '2-digit',
@@ -106,11 +107,12 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
         index + 1,
         dateStr,
         timeStr,
+        sub.employeeId,
         sub.firstName,
         sub.lastName,
-        sub.nickname,
-        sub.position,
+        sub.branchCode || '',
         sub.branch,
+        sub.message || '',
         sub.imageUrl,
         sub.ipAddress || 'unknown',
         sub.userAgent || 'unknown'
@@ -120,16 +122,16 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
     
-    // Set column widths for convenience
     const colWidths = [
       { wch: 6 },  // No.
       { wch: 15 }, // Date
       { wch: 12 }, // Time
+      { wch: 15 }, // Employee ID
       { wch: 15 }, // First Name
       { wch: 18 }, // Last Name
-      { wch: 10 }, // Nickname
-      { wch: 20 }, // Position
-      { wch: 25 }, // Branch
+      { wch: 12 }, // Branch Code
+      { wch: 30 }, // Branch
+      { wch: 40 }, // Message
       { wch: 60 }, // URL
       { wch: 18 }, // IP
       { wch: 40 }  // User Agent
@@ -225,7 +227,7 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
               {submissions.length} <span style={{ fontSize: '16px', color: '#64748b', fontWeight: 500 }}>คน</span>
             </div>
             <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
-              * อัปเดตข้อมูลแบบเรียลไทม์ (จำกัด 1 สิทธิ์ต่อ 1 ชื่อจริงและนามสกุล)
+              * อัปเดตข้อมูลแบบเรียลไทม์ (จำกัด 1 สิทธิ์ต่อ 1 รหัสพนักงาน)
             </div>
           </div>
 
@@ -264,7 +266,7 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
               <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
               <input
                 type="text"
-                placeholder="ค้นหาตาม ชื่อจริง, นามสกุล, ชื่อเล่น, ตำแหน่ง หรือชื่อสาขา..."
+                placeholder="ค้นหาตาม รหัสพนักงาน, ชื่อ, นามสกุล, สาขา หรือข้อความ..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
@@ -322,10 +324,10 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
                   <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '13px', fontWeight: 600, backgroundColor: '#f8fafc' }}>
                     <th style={{ padding: '16px 24px' }}>พรีวิวรูปภาพ</th>
                     <th style={{ padding: '16px 12px' }}>วันที่อัปโหลด</th>
+                    <th style={{ padding: '16px 12px' }}>รหัสพนักงาน</th>
                     <th style={{ padding: '16px 12px' }}>ชื่อ - นามสกุล</th>
-                    <th style={{ padding: '16px 12px' }}>ชื่อเล่น</th>
-                    <th style={{ padding: '16px 12px' }}>ตำแหน่ง</th>
                     <th style={{ padding: '16px 12px' }}>สาขา</th>
+                    <th style={{ padding: '16px 12px' }}>ข้อความถึงแม่</th>
                     <th style={{ padding: '16px 24px', textAlign: 'center' }}>ลิงก์รูปภาพ</th>
                   </tr>
                 </thead>
@@ -389,6 +391,14 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
                           </div>
                         </td>
 
+                        {/* Employee ID */}
+                        <td style={{ padding: '16px 12px', color: '#475569' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Hash size={14} style={{ color: '#94a3b8' }} />
+                            {sub.employeeId}
+                          </div>
+                        </td>
+
                         {/* Name */}
                         <td style={{ padding: '16px 12px', fontWeight: 600, color: '#0f172a' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -397,24 +407,21 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
                           </div>
                         </td>
 
-                        {/* Nickname */}
-                        <td style={{ padding: '16px 12px', color: '#0284c7', fontWeight: 600 }}>
-                          "{sub.nickname}"
-                        </td>
-
-                        {/* Position */}
-                        <td style={{ padding: '16px 12px', color: '#475569' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Briefcase size={14} style={{ color: '#94a3b8' }} />
-                            {sub.position}
-                          </div>
-                        </td>
-
                         {/* Branch */}
                         <td style={{ padding: '16px 12px', color: '#1e40af', fontWeight: 600 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <MapPin size={14} style={{ color: '#94a3b8' }} />
                             {sub.branch}
+                          </div>
+                        </td>
+
+                        {/* Message */}
+                        <td style={{ padding: '16px 12px', color: '#0284c7', maxWidth: '200px' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                            <MessageCircle size={14} style={{ color: '#94a3b8', marginTop: '2px', flexShrink: 0 }} />
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>
+                              {sub.message || '-'}
+                            </span>
                           </div>
                         </td>
 

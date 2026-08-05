@@ -1,18 +1,18 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import BranchSelect from '@/components/BranchSelect';
+import MotherDayBranchSelect from '@/components/MotherDayBranchSelect';
 import { submitMotherDay } from '@/app/actions/motherday';
-import { Upload, X, CheckCircle, Heart, Award, Sparkles } from 'lucide-react';
+import { Upload, X, CheckCircle, Heart, Award, Sparkles, ChevronDown } from 'lucide-react';
 import './style.css';
 
 export default function MotherDayCampaignPage() {
   // Form fields state
+  const [employeeId, setEmployeeId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [position, setPosition] = useState('');
   const [branch, setBranch] = useState('');
+  const [message, setMessage] = useState('');
   const [file, setFile] = useState<File | null>(null);
 
   // UI state
@@ -21,206 +21,218 @@ export default function MotherDayCampaignPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showDesc, setShowDesc] = useState(true);
   
   // Success data state
   const [successData, setSuccessData] = useState<{
+    employeeId: string;
     firstName: string;
     lastName: string;
-    nickname: string;
-    position: string;
     branch: string;
+    message: string;
     imageUrl: string;
   } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Cleanup preview URL on unmount to prevent memory leaks
+  // Cleanup preview URL on unmount
   useEffect(() => {
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
 
-  // Handle Drag & Drop events
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
+  // Drag & Drop
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragOver(true); };
+  const handleDragLeave = () => setIsDragOver(false);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      validateAndSetFile(e.dataTransfer.files[0]);
-    }
+    if (e.dataTransfer.files?.length > 0) validateAndSetFile(e.dataTransfer.files[0]);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      validateAndSetFile(e.target.files[0]);
-    }
+    if (e.target.files?.length) validateAndSetFile(e.target.files[0]);
   };
 
   const validateAndSetFile = (selectedFile: File) => {
-    // Reset file errors
     const newErrors = { ...errors };
     delete newErrors.file;
     setErrors(newErrors);
 
-    // Validate type (must be an image)
     if (!selectedFile.type.startsWith('image/')) {
       setErrors(prev => ({ ...prev, file: 'กรุณาอัปโหลดเฉพาะไฟล์รูปภาพเท่านั้น' }));
       return;
     }
-
-    // Validate size (limit to 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (selectedFile.size > maxSize) {
+    if (selectedFile.size > 10 * 1024 * 1024) {
       setErrors(prev => ({ ...prev, file: 'ขนาดรูปภาพต้องไม่เกิน 10MB' }));
       return;
     }
 
     setFile(selectedFile);
-
-    // Generate preview
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(URL.createObjectURL(selectedFile));
   };
 
   const handleRemoveFile = (e: React.MouseEvent) => {
     e.stopPropagation();
     setFile(null);
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    if (previewUrl) { URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const clearFieldError = (field: string) => {
+    if (errors[field]) {
+      const newErrors = { ...errors };
+      delete newErrors[field];
+      setErrors(newErrors);
     }
   };
 
-  // Form Validation
+  // Validation
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-
+    if (!employeeId.trim()) newErrors.employeeId = 'กรุณากรอกรหัสพนักงาน';
     if (!firstName.trim()) newErrors.firstName = 'กรุณากรอกชื่อจริง';
     if (!lastName.trim()) newErrors.lastName = 'กรุณากรอกนามสกุล';
-    if (!nickname.trim()) newErrors.nickname = 'กรุณากรอกชื่อเล่น';
-    if (!position.trim()) newErrors.position = 'กรุณากรอกตำแหน่ง';
     if (!branch) newErrors.branch = 'กรุณาเลือกสาขา';
+    if (!message.trim()) newErrors.message = 'กรุณาเขียนข้อความถึงแม่';
     if (!file) newErrors.file = 'กรุณาอัปโหลดรูปภาพ 1 รูป';
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle Form Submission
+  // Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
-
-    if (!validateForm() || !file) {
-      return;
-    }
+    if (!validateForm() || !file) return;
 
     setIsSubmitting(true);
-
     try {
       const formData = new FormData();
+      formData.append('employeeId', employeeId);
       formData.append('firstName', firstName);
       formData.append('lastName', lastName);
-      formData.append('nickname', nickname);
-      formData.append('position', position);
       formData.append('branch', branch);
+      formData.append('message', message);
       formData.append('file', file);
 
       const result = await submitMotherDay(formData);
-
       if (result.success && result.data) {
         setSuccessData(result.data);
       } else {
-        setErrorMessage(result.error || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+        setErrorMessage(result.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
       }
-    } catch (error: any) {
-      console.error(error);
-      setErrorMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง');
+    } catch {
+      setErrorMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Reset form to submit again
+  // Reset
   const handleReset = () => {
-    setFirstName('');
-    setLastName('');
-    setNickname('');
-    setPosition('');
-    setBranch('');
-    setFile(null);
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
-    }
-    setErrors({});
-    setSuccessData(null);
-    setErrorMessage(null);
+    setEmployeeId(''); setFirstName(''); setLastName('');
+    setBranch(''); setMessage(''); setFile(null);
+    if (previewUrl) { URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }
+    setErrors({}); setSuccessData(null); setErrorMessage(null);
   };
 
   return (
     <div className="motherday-wrapper">
       <div className="motherday-container">
         
-        {/* Header Section */}
+        {/* Header */}
         <header className="campaign-header">
           <span className="campaign-badge">
-            <Heart size={14} className="inline mr-1 fill-sky-500 stroke-sky-500" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> 
+            <Heart size={13} style={{ fill: '#fff', stroke: '#fff' }} />
             กิจกรรมวันแม่ 12 สิงหาคม
           </span>
-          <h1 className="campaign-title">Mother's Day Campaign</h1>
-          <p className="campaign-subtitle">
-            ขอเชิญชวนพนักงานร่วมกิจกรรมวันแม่ ร่วมส่งภาพถ่ายเพื่อแสดงความรักต่อคุณแม่ พร้อมรับการ์ดรูปภาพที่ระลึก
-          </p>
+          <h1 className="campaign-title">❤️💛 &quot;มื้อนี้ อยากบอกแม่ว่า..&quot; 🩵</h1>
         </header>
 
-        {/* Success View */}
+        {/* Collapsible Description */}
+        <div className="campaign-desc-card">
+          <button
+            type="button"
+            className={`desc-toggle-btn ${showDesc ? 'open' : ''}`}
+            onClick={() => setShowDesc(!showDesc)}
+          >
+            <span>📢 รายละเอียดกิจกรรม &amp; กติกา</span>
+            <ChevronDown size={20} />
+          </button>
+
+          {showDesc && (
+            <div className="desc-content">
+              <p>
+                ชวนพนักงานบอกรักแม่ในแบบฉบับ McDonald&apos;s กับกิจกรรม &quot;มื้อนี้ อยากบอกแม่ว่า...&quot; 💛❤️
+              </p>
+              <p>
+                วันแม่ปีนี้... จากคำถามคุ้นหูอย่าง &quot;กินข้าวหรือยัง?&quot; ที่แม่คอยถามเราอยู่เสมอ
+                เปลี่ยนมาเป็นฝ่ายชวนแม่ทานข้าวด้วยกันบ้างดีกว่า 🍟🍔🍦
+              </p>
+              <p>
+                แมคโดนัลด์ชวนพนักงานทุกท่านร่วมส่งต่อความรักและความห่วงใยให้คุณแม่
+                (หรือบุคคลสำคัญที่ทำหน้าที่เสมือนแม่) ผ่านมื้ออาหารสุดพิเศษด้วยกัน
+                พร้อมเก็บโมเมนต์ความสุขนี้ไว้เป็นความทรงจำดี ๆ
+              </p>
+
+              <p className="desc-section-title">📸 กติกาง่าย ๆ ในการร่วมสนุก</p>
+              <ol>
+                <li>ถ่ายภาพคู่ ระหว่างคุณกับคุณแม่ (หรือคนที่ทำหน้าที่เสมือนแม่)</li>
+                <li>คู่กับเมนู McDonald&apos;s เมนูโปรดเมนูใดก็ได้</li>
+                <li>เขียนประโยคสั้น ๆ เติมคำในช่องว่าง: &quot;มื้อนี้ อยากบอกแม่ว่า…&quot;</li>
+              </ol>
+
+              <p className="desc-section-title">🎁 รางวัลพิเศษสำหรับพนักงาน</p>
+              <p>
+                100 ภาพแรก ที่ส่งข้อมูลครบถ้วนตามเงื่อนไข รับทันที! กรอบรูปวันแม่สุดพิเศษ
+                พร้อมใส่ภาพถ่ายความประทับใจของคุณ เพื่อให้คุณแม่เก็บรักษาความทรงจำดี ๆ นี้ไว้ได้นานที่สุด
+              </p>
+
+              <div className="desc-highlight">
+                🗓️ ร่วมส่งภาพได้ตั้งแต่ วันที่ 7 – 14 สิงหาคม 2569 นี้เท่านั้น!
+              </div>
+              <p style={{ textAlign: 'center', marginBottom: 0 }}>
+                มาร่วมสร้างรอยยิ้มและโมเมนต์ความหมายดี ๆ<br />ให้คุณแม่ในวันแม่ปีนี้ด้วยกันนะ ✨❤️💛
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* ── Success View ── */}
         {successData ? (
           <div className="campaign-card success-card">
             <div className="success-icon-wrapper">
-              <CheckCircle size={36} />
+              <CheckCircle size={32} />
             </div>
             <h2 className="success-title">ส่งภาพเข้าร่วมกิจกรรมแล้ว!</h2>
-            <p className="success-subtitle">ขอบคุณที่คุณร่วมเป็นส่วนหนึ่งในกิจกรรมวันแม่ปีนี้ นี่คือการ์ดรูปภาพที่ระลึกของคุณ</p>
+            <p className="success-subtitle">
+              ขอบคุณที่ร่วมเป็นส่วนหนึ่งในกิจกรรม &quot;มื้อนี้ อยากบอกแม่ว่า...&quot; 💛
+            </p>
 
-            {/* Certificate digital frame card */}
             <div className="digital-frame-container">
               <div className="digital-frame">
-                {/* Jasmine flower decorations (visual) */}
                 <div className="frame-decoration">
-                  <Sparkles size={24} color="#ca8a04" className="fill-yellow-400" />
+                  <Sparkles size={22} color="#ca8a04" />
                 </div>
-                
                 <div className="frame-image-wrapper">
-                  <img 
-                    src={successData.imageUrl} 
+                  <img
+                    src={successData.imageUrl}
                     alt={`${successData.firstName} ${successData.lastName}`}
                     className="frame-photo"
                   />
                 </div>
-                
                 <div className="frame-info">
                   <div className="frame-name-tag">{successData.firstName} {successData.lastName}</div>
-                  <div className="frame-nickname-tag">ชื่อเล่น: {successData.nickname}</div>
+                  {successData.message && (
+                    <div className="frame-nickname-tag" style={{ fontStyle: 'italic' }}>
+                      &quot;มื้อนี้ อยากบอกแม่ว่า... {successData.message}&quot;
+                    </div>
+                  )}
                   <div className="frame-details">
-                    <span className="frame-badge">{successData.position}</span>
                     <span className="frame-badge branch-badge">{successData.branch}</span>
                   </div>
                 </div>
@@ -234,7 +246,7 @@ export default function MotherDayCampaignPage() {
             </div>
           </div>
         ) : (
-          /* Form View */
+          /* ── Form View ── */
           <div className="campaign-card">
             {errorMessage && (
               <div className="alert-box error">
@@ -245,24 +257,31 @@ export default function MotherDayCampaignPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="form-grid">
-                
+
+                {/* Employee ID — full width */}
+                <div className={`form-group full-width ${errors.employeeId ? 'has-error' : ''}`}>
+                  <label htmlFor="employeeId" className="form-label">รหัสพนักงาน <span>*</span></label>
+                  <input
+                    id="employeeId"
+                    type="text"
+                    className={`form-input ${errors.employeeId ? 'input-error' : ''}`}
+                    placeholder="กรอกรหัสพนักงาน"
+                    value={employeeId}
+                    onChange={(e) => { setEmployeeId(e.target.value); clearFieldError('employeeId'); }}
+                  />
+                  {errors.employeeId && <span className="error-text">{errors.employeeId}</span>}
+                </div>
+
                 {/* First Name */}
                 <div className={`form-group ${errors.firstName ? 'has-error' : ''}`}>
-                  <label htmlFor="firstName" className="form-label">ชื่อจริง <span>*</span></label>
+                  <label htmlFor="firstName" className="form-label">ชื่อ <span>*</span></label>
                   <input
                     id="firstName"
                     type="text"
                     className={`form-input ${errors.firstName ? 'input-error' : ''}`}
-                    placeholder="กรอกชื่อจริง (เช่น สมชาย)"
+                    placeholder="กรอกชื่อ"
                     value={firstName}
-                    onChange={(e) => {
-                      setFirstName(e.target.value);
-                      if (errors.firstName) {
-                        const newErrors = { ...errors };
-                        delete newErrors.firstName;
-                        setErrors(newErrors);
-                      }
-                    }}
+                    onChange={(e) => { setFirstName(e.target.value); clearFieldError('firstName'); }}
                   />
                   {errors.firstName && <span className="error-text">{errors.firstName}</span>}
                 </div>
@@ -274,105 +293,53 @@ export default function MotherDayCampaignPage() {
                     id="lastName"
                     type="text"
                     className={`form-input ${errors.lastName ? 'input-error' : ''}`}
-                    placeholder="กรอกนามสกุล (เช่น รักดี)"
+                    placeholder="กรอกนามสกุล"
                     value={lastName}
-                    onChange={(e) => {
-                      setLastName(e.target.value);
-                      if (errors.lastName) {
-                        const newErrors = { ...errors };
-                        delete newErrors.lastName;
-                        setErrors(newErrors);
-                      }
-                    }}
+                    onChange={(e) => { setLastName(e.target.value); clearFieldError('lastName'); }}
                   />
                   {errors.lastName && <span className="error-text">{errors.lastName}</span>}
                 </div>
 
-                {/* Nickname */}
-                <div className={`form-group ${errors.nickname ? 'has-error' : ''}`}>
-                  <label htmlFor="nickname" className="form-label">ชื่อเล่น <span>*</span></label>
-                  <input
-                    id="nickname"
-                    type="text"
-                    className={`form-input ${errors.nickname ? 'input-error' : ''}`}
-                    placeholder="กรอกชื่อเล่น (เช่น บอย)"
-                    value={nickname}
-                    onChange={(e) => {
-                      setNickname(e.target.value);
-                      if (errors.nickname) {
-                        const newErrors = { ...errors };
-                        delete newErrors.nickname;
-                        setErrors(newErrors);
-                      }
-                    }}
-                  />
-                  {errors.nickname && <span className="error-text">{errors.nickname}</span>}
-                </div>
-
-                {/* Position */}
-                <div className={`form-group ${errors.position ? 'has-error' : ''}`}>
-                  <label htmlFor="position" className="form-label">ตำแหน่ง <span>*</span></label>
-                  <input
-                    id="position"
-                    type="text"
-                    className={`form-input ${errors.position ? 'input-error' : ''}`}
-                    placeholder="กรอกตำแหน่งงาน (เช่น ผู้จัดการสาขา)"
-                    value={position}
-                    onChange={(e) => {
-                      setPosition(e.target.value);
-                      if (errors.position) {
-                        const newErrors = { ...errors };
-                        delete newErrors.position;
-                        setErrors(newErrors);
-                      }
-                    }}
-                  />
-                  {errors.position && <span className="error-text">{errors.position}</span>}
-                </div>
-
-                {/* Branch Select (Searchable) */}
+                {/* Branch — full width */}
                 <div className="form-group full-width">
-                  <BranchSelect
+                  <MotherDayBranchSelect
                     id="branch"
                     value={branch}
-                    onChange={(val) => {
-                      setBranch(val);
-                      if (errors.branch) {
-                        const newErrors = { ...errors };
-                        delete newErrors.branch;
-                        setErrors(newErrors);
-                      }
-                    }}
-                    placeholder="พิมพ์ค้นหาและเลือกสาขา..."
-                    label={
-                      <span className="form-label">
-                        สาขาปฏิบัติงาน <span>*</span>
-                      </span>
-                    }
+                    onChange={(val) => { setBranch(val); clearFieldError('branch'); }}
+                    placeholder="พิมพ์ชื่อสาขาเพื่อค้นหา..."
+                    label={<span className="form-label">สาขาปฏิบัติงาน <span>*</span></span>}
                     error={errors.branch}
                   />
                 </div>
 
-                {/* Image Upload Area */}
+                {/* Message — full width */}
+                <div className={`form-group full-width ${errors.message ? 'has-error' : ''}`}>
+                  <label htmlFor="message" className="form-label">💛 มื้อนี้ อยากบอกแม่ว่า... <span>*</span></label>
+                  <textarea
+                    id="message"
+                    className={`form-input ${errors.message ? 'input-error' : ''}`}
+                    placeholder="เขียนข้อความถึงแม่ของคุณ..."
+                    value={message}
+                    rows={3}
+                    onChange={(e) => { setMessage(e.target.value); clearFieldError('message'); }}
+                    style={{ resize: 'vertical', minHeight: '80px' }}
+                  />
+                  {errors.message && <span className="error-text">{errors.message}</span>}
+                </div>
+
+                {/* Upload — full width */}
                 <div className="form-group full-width">
-                  <label className="form-label">รูปถ่ายสำหรับกิจกรรม (1 รูป) <span>*</span></label>
-                  
+                  <label className="form-label">📸 รูปถ่ายคู่กับแม่ + เมนู McDonald&apos;s <span>*</span></label>
+
                   {previewUrl ? (
-                    /* Preview screen */
                     <div className="preview-container">
                       <img src={previewUrl} alt="Preview" className="preview-image" />
-                      <button 
-                        type="button" 
-                        onClick={handleRemoveFile} 
-                        className="remove-preview-btn"
-                        title="ลบรูปภาพ"
-                      >
-                        <X size={18} />
+                      <button type="button" onClick={handleRemoveFile} className="remove-preview-btn" title="ลบรูปภาพ">
+                        <X size={16} />
                       </button>
                     </div>
                   ) : (
-                    /* Dropzone screen */
-                    <div 
+                    <div
                       className={`upload-zone ${isDragOver ? 'drag-over' : ''}`}
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
@@ -380,11 +347,10 @@ export default function MotherDayCampaignPage() {
                       onClick={() => fileInputRef.current?.click()}
                     >
                       <div className="upload-icon-container">
-                        <Upload size={24} />
+                        <Upload size={22} />
                       </div>
-                      <div className="upload-title">ลากไฟล์รูปภาพมาวางที่นี่ หรือคลิกเพื่ออัปโหลด</div>
-                      <div className="upload-subtitle">รองรับไฟล์รูปภาพทุกประเภท (สูงสุด 10MB)</div>
-                      
+                      <div className="upload-title">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่ออัปโหลด</div>
+                      <div className="upload-subtitle">รองรับรูปภาพทุกประเภท (สูงสุด 10MB)</div>
                       <input
                         ref={fileInputRef}
                         type="file"
@@ -398,19 +364,11 @@ export default function MotherDayCampaignPage() {
                 </div>
               </div>
 
-              <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '20px', lineHeight: 1.4 }}>
-                💡 <strong>คำแนะนำ:</strong> 1 ท่านสามารถส่งผลงานได้ 1 รูปภาพเท่านั้น ระบบจะทำการบันทึกและเปลี่ยนชื่อไฟล์ของท่านเป็น <strong>"ชื่อ_นามสกุล"</strong> โดยอัตโนมัติเมื่อจัดเก็บในระบบ
-              </div>
-
-              <button 
-                type="submit" 
-                className="submit-btn" 
-                disabled={isSubmitting}
-              >
+              <button type="submit" className="submit-btn" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <div className="spinner" />
-                    กำลังอัปโหลดและบันทึกข้อมูล...
+                    กำลังอัปโหลด...
                   </>
                 ) : (
                   <>
