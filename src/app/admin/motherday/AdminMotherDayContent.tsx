@@ -82,9 +82,7 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
       'รหัสสาขา',
       'สาขา',
       'ข้อความถึงแม่',
-      'ลิงก์รูปภาพ R2',
-      'IP Address',
-      'User Agent'
+      'ลิงก์รูปภาพ R2'
     ];
 
     const dataRows = filteredSubmissions.map((sub, index) => {
@@ -113,9 +111,7 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
         sub.branchCode || '',
         sub.branch,
         sub.message || '',
-        sub.imageUrl,
-        sub.ipAddress || 'unknown',
-        sub.userAgent || 'unknown'
+        sub.imageUrl
       ];
     });
 
@@ -132,9 +128,7 @@ export default function AdminMotherDayContent({ initialSubmissions }: AdminMothe
       { wch: 12 }, // Branch Code
       { wch: 30 }, // Branch
       { wch: 40 }, // Message
-      { wch: 60 }, // URL
-      { wch: 18 }, // IP
-      { wch: 40 }  // User Agent
+      { wch: 60 }  // URL
     ];
     ws['!cols'] = colWidths;
 
