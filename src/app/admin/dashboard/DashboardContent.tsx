@@ -23,7 +23,8 @@ import {
   Award,
   AlertTriangle,
   MessageSquare,
-  Settings
+  Settings,
+  Heart
 } from 'lucide-react';
 
 interface ResponseData {
@@ -565,6 +566,9 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             {(currentUser.role === 'ADMIN' || currentUser.role === 'SUPER_ADMIN') && (
               <>
+                <Link href="/admin/motherday" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Heart size={14} style={{ fill: '#e11d48', stroke: '#e11d48' }} /> กิจกรรมวันแม่
+                </Link>
                 <Link href="/chat" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <MessageSquare size={14} /> ทดสอบแชทบอท
                 </Link>
