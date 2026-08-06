@@ -17,6 +17,13 @@ interface MotherDayBranchSelectProps {
   error?: string;
 }
 
+const formatBranchLabel = (code: string, name: string) => {
+  if (name === 'สำนักงานใหญ่' || code === '10000') {
+    return name;
+  }
+  return `${code} - ${name}`;
+};
+
 export default function MotherDayBranchSelect({
   value,
   onChange,
@@ -48,7 +55,7 @@ export default function MotherDayBranchSelect({
   useEffect(() => {
     if (value) {
       const selected = branches.find((b) => b.code === value);
-      setSearchTerm(selected ? `${selected.code} - ${selected.name}` : value);
+      setSearchTerm(selected ? formatBranchLabel(selected.code, selected.name) : value);
     } else {
       setSearchTerm('');
     }
@@ -86,7 +93,7 @@ export default function MotherDayBranchSelect({
   const resetDisplay = () => {
     if (value) {
       const selected = branches.find((b) => b.code === value);
-      setSearchTerm(selected ? `${selected.code} - ${selected.name}` : value);
+      setSearchTerm(selected ? formatBranchLabel(selected.code, selected.name) : value);
     } else {
       setSearchTerm('');
     }
@@ -94,7 +101,7 @@ export default function MotherDayBranchSelect({
 
   const handleSelect = (branch: BranchOption) => {
     onChange(branch.code);
-    setSearchTerm(`${branch.code} - ${branch.name}`);
+    setSearchTerm(formatBranchLabel(branch.code, branch.name));
     setIsOpen(false);
   };
 
@@ -158,7 +165,7 @@ export default function MotherDayBranchSelect({
                       handleSelect(branch);
                     }}
                   >
-                    <span>{branch.code} - {branch.name}</span>
+                    <span>{formatBranchLabel(branch.code, branch.name)}</span>
                     {isSelected && <Check size={16} className="check-icon" />}
                   </li>
                 );
