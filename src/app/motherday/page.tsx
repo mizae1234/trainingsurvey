@@ -304,7 +304,7 @@ export default function MotherDayCampaignPage() {
                     value={branch}
                     onChange={(val) => { setBranch(val); clearFieldError('branch'); }}
                     placeholder="พิมพ์ชื่อสาขาเพื่อค้นหา..."
-                    label={<span className="form-label">สาขาปฏิบัติงาน <span>*</span></span>}
+                    label={<span className="form-label">สถานที่ปฏิบัติงาน <span>*</span></span>}
                     error={errors.branch}
                   />
                 </div>
