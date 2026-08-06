@@ -48,7 +48,7 @@ export default function MotherDayBranchSelect({
   useEffect(() => {
     if (value) {
       const selected = branches.find((b) => b.code === value);
-      setSearchTerm(selected ? selected.name : value);
+      setSearchTerm(selected ? `${selected.code} - ${selected.name}` : value);
     } else {
       setSearchTerm('');
     }
@@ -86,7 +86,7 @@ export default function MotherDayBranchSelect({
   const resetDisplay = () => {
     if (value) {
       const selected = branches.find((b) => b.code === value);
-      setSearchTerm(selected ? selected.name : value);
+      setSearchTerm(selected ? `${selected.code} - ${selected.name}` : value);
     } else {
       setSearchTerm('');
     }
@@ -94,7 +94,7 @@ export default function MotherDayBranchSelect({
 
   const handleSelect = (branch: BranchOption) => {
     onChange(branch.code);
-    setSearchTerm(branch.name);
+    setSearchTerm(`${branch.code} - ${branch.name}`);
     setIsOpen(false);
   };
 
@@ -158,7 +158,7 @@ export default function MotherDayBranchSelect({
                       handleSelect(branch);
                     }}
                   >
-                    <span>{branch.name}</span>
+                    <span>{branch.code} - {branch.name}</span>
                     {isSelected && <Check size={16} className="check-icon" />}
                   </li>
                 );

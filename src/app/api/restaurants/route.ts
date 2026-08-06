@@ -8,6 +8,13 @@ export async function GET() {
       select: { code: true, name: true },
     });
 
+    // Move '10000' (สำนักงานใหญ่) to the front of the list
+    const hoIndex = branches.findIndex(b => b.code === '10000');
+    if (hoIndex > -1) {
+      const [ho] = branches.splice(hoIndex, 1);
+      branches.unshift(ho);
+    }
+
     return NextResponse.json(branches);
   } catch (error) {
     console.error('Error fetching branches:', error);
