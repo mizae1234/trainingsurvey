@@ -1,0 +1,429 @@
+/* McThai HR Office Survey Styles */
+.hr-survey-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #FFFBEB 0%, #FEF2F2 20%, #F8FAFC 50%, #FFFBEB 100%);
+  padding: 32px 16px 64px 16px;
+  font-family: 'Sarabun', 'Inter', -apple-system, sans-serif;
+  color: #1E293B;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hr-survey-container {
+  max-width: 760px;
+  width: 100%;
+}
+
+/* Floating Brand Bar */
+.hr-survey-brand-bar {
+  height: 6px;
+  background: linear-gradient(90deg, #DA291C 0%, #FFBC0D 50%, #DA291C 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+}
+
+/* Header Card */
+.hr-header-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 36px 28px;
+  box-shadow: 0 10px 25px -5px rgba(218, 41, 28, 0.08), 0 8px 10px -6px rgba(255, 188, 13, 0.1);
+  border: 1px solid rgba(255, 188, 13, 0.3);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.hr-header-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #DA291C, #FFBC0D);
+}
+
+.hr-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.hr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 9999px;
+}
+
+.hr-badge-anon {
+  background-color: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+
+.hr-badge-time {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+.hr-badge-mc {
+  background-color: #FFF1F2;
+  color: #BE123C;
+  border: 1px solid #FECDD3;
+}
+
+.hr-header-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.35;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hr-header-desc {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.hr-quote-box {
+  background: linear-gradient(135deg, #FFFDF5 0%, #FFF8E6 100%);
+  border-left: 4px solid #FFBC0D;
+  padding: 14px 18px;
+  border-radius: 0 12px 12px 0;
+  font-size: 14.5px;
+  color: #78350F;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* Question Cards */
+.hr-q-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid #E2E8F0;
+  transition: all 0.2s ease-in-out;
+}
+
+.hr-q-card:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
+}
+
+.hr-q-card.hr-card-focus {
+  border-color: #FFBC0D;
+  box-shadow: 0 0 0 3px rgba(255, 188, 13, 0.2), 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.hr-q-card.hr-card-error {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* Highlight Priority Card */
+.hr-q-card-priority {
+  background: linear-gradient(180deg, #FFFDF7 0%, #FFFFFF 100%);
+  border: 2px solid #FFBC0D;
+  box-shadow: 0 8px 24px rgba(255, 188, 13, 0.15);
+  position: relative;
+}
+
+.hr-priority-tag {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: linear-gradient(135deg, #DA291C, #E11D48);
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(218, 41, 28, 0.3);
+  letter-spacing: 0.3px;
+}
+
+.hr-q-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.hr-q-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.hr-q-icon-red {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.hr-q-icon-green {
+  background: #DCFCE7;
+  color: #16A34A;
+}
+
+.hr-q-icon-blue {
+  background: #DBEAFE;
+  color: #2563EB;
+}
+
+.hr-q-icon-purple {
+  background: #F3E8FF;
+  color: #9333EA;
+}
+
+.hr-q-title-group {
+  flex: 1;
+}
+
+.hr-q-title {
+  font-size: 16.5px;
+  font-weight: 600;
+  color: #0F172A;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hr-required-mark {
+  color: #DC2626;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.hr-optional-mark {
+  color: #94A3B8;
+  font-size: 12px;
+  font-weight: 400;
+  background: #F1F5F9;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.hr-q-subtitle {
+  font-size: 13px;
+  color: #64748B;
+  margin-top: 3px;
+}
+
+/* Textarea Input */
+.hr-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #CBD5E1;
+  background: #F8FAFC;
+  font-family: inherit;
+  font-size: 15px;
+  color: #1E293B;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.hr-textarea:focus {
+  background: #FFFFFF;
+  border-color: #FFBC0D;
+  box-shadow: 0 0 0 3px rgba(255, 188, 13, 0.25);
+}
+
+.hr-textarea-error {
+  border-color: #EF4444 !important;
+  background: #FEF2F2 !important;
+}
+
+.hr-error-text {
+  font-size: 13px;
+  color: #DC2626;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hr-char-count {
+  text-align: right;
+  font-size: 12px;
+  color: #94A3B8;
+  margin-top: 4px;
+}
+
+/* Action Bar */
+.hr-action-bar {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.hr-submit-btn {
+  background: linear-gradient(135deg, #DA291C 0%, #E11D48 100%);
+  color: #FFFFFF;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 15px 36px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(218, 41, 28, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 380px;
+  transition: all 0.2s ease;
+}
+
+.hr-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(218, 41, 28, 0.45);
+  background: linear-gradient(135deg, #C21B10 0%, #BE123C 100%);
+}
+
+.hr-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.hr-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.hr-draft-status {
+  font-size: 13px;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Success Card */
+.hr-success-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 44px 32px;
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E2E8F0;
+  margin-top: 20px;
+}
+
+.hr-success-icon-wrap {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #DCFCE7, #FEF3C7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+  font-size: 38px;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.2);
+}
+
+.hr-success-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 12px;
+}
+
+.hr-success-message {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.7;
+  max-width: 520px;
+  margin: 0 auto 24px auto;
+}
+
+/* Closed State Card */
+.hr-closed-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 40px 28px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid #CBD5E1;
+  margin-top: 20px;
+}
+
+.hr-closed-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px auto;
+  color: #64748B;
+}
+
+/* Footer */
+.hr-survey-footer {
+  margin-top: 36px;
+  text-align: center;
+  font-size: 13px;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .hr-survey-wrapper {
+    padding: 20px 12px 48px 12px;
+  }
+  .hr-header-card {
+    padding: 24px 18px;
+  }
+  .hr-header-title {
+    font-size: 21px;
+  }
+  .hr-header-desc {
+    font-size: 14.5px;
+  }
+  .hr-q-card {
+    padding: 18px 14px;
+  }
+  .hr-submit-btn {
+    font-size: 16px;
+    padding: 14px 24px;
+  }
+}

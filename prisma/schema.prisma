@@ -135,3 +135,17 @@ model Branch {
   code String @unique
   name String
 }
+
+model OfficeSurveyResponse {
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  ipAddress      String?
+  userAgent      String?
+
+  q1_liked       String   // 1. สิ่งที่ชอบและอยากให้คงไว้
+  q2_improve     String   // 2. สิ่งที่อยากให้ปรับปรุงหรือแก้ไข
+  q3_additions   String   // 3. สิ่งที่อยากให้มีเพิ่มเข้ามา
+  q4_priority    String   // 4. เรื่องที่อยากให้เปลี่ยนเป็นอันดับแรก (ถ้าทำได้แค่อย่างเดียว)
+  q5_suggestions String?  // 5. ข้อเสนอแนะอื่นๆ (ถ้ามี)
+}
+

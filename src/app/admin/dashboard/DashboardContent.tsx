@@ -24,7 +24,8 @@ import {
   AlertTriangle,
   MessageSquare,
   Settings,
-  Heart
+  Heart,
+  Sparkles
 } from 'lucide-react';
 
 interface ResponseData {
@@ -566,6 +567,9 @@ export default function DashboardContent({ initialResponses, currentUser }: Dash
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             {(currentUser.role === 'ADMIN' || currentUser.role === 'SUPER_ADMIN') && (
               <>
+                <Link href="/admin/office-survey" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={14} style={{ color: '#D97706' }} /> ไอเดียออฟฟิศ HR
+                </Link>
                 <Link href="/admin/motherday" className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <Heart size={14} style={{ fill: '#e11d48', stroke: '#e11d48' }} /> กิจกรรมวันแม่
                 </Link>
