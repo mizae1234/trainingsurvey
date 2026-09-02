@@ -298,7 +298,7 @@ export default function HrOfficeSurveyPage() {
             <h2 className="hr-success-title">ขอบคุณสำหรับทุกไอเดียและทุกความรู้สึกค่ะ! 💛 ❤️</h2>
 
             <p className="hr-success-message">
-              ขอบคุณทุกคน ที่ร่วมแบ่งปันมุมมอง เพื่อช่วยกันสร้างพื้นที่ทำงานที่น่าอยู่
+              ขอบคุณทุกคน ที่ร่วมแบ่งปันมุมมอง เพื่อช่วยกันสร้างพื้นที่ทำงานที่น่าอยู่และเป็นพลังใจให้กันในทุกๆ วัน 💛 ❤️
               <br />
               <span style={{ fontSize: '14px', color: '#64748B', display: 'block', marginTop: '10px' }}>
                 ทุกข้อเสนอแนะของทุกคนมีคุณค่า และจะถูกนำไปร่วมพิจารณาพัฒนาพื้นที่ออฟฟิศ McThai
@@ -360,6 +360,9 @@ export default function HrOfficeSurveyPage() {
                     <span>1. สิ่งที่ชอบและอยากให้คงไว้</span>
                     <span className="hr-required-mark">*</span>
                   </label>
+                  <p className="hr-q-subtitle">
+                    อะไรในสำนักงานตอนนี้ที่รู้สึกดี ประทับใจ หรือตอบโจทย์การทำงานอยู่แล้วและอยากให้รักษาไว้
+                  </p>
                 </div>
               </div>
 
@@ -368,6 +371,7 @@ export default function HrOfficeSurveyPage() {
                 ref={q1Ref}
                 value={q1}
                 onChange={(e) => handleFieldChange('q1', e.target.value, setQ1)}
+                placeholder="เช่น บรรยากาศการทำงานที่อบอุ่น, แสงธรรมชาติ, โซนพักผ่อน, ความสะดวกสบายของสิ่งอำนวยความสะดวกเดิม..."
                 className={`hr-textarea ${errors.q1 ? 'hr-textarea-error' : ''}`}
                 rows={3}
               />
@@ -389,6 +393,9 @@ export default function HrOfficeSurveyPage() {
                     <span>2. สิ่งที่อยากให้ปรับปรุงหรือแก้ไข</span>
                     <span className="hr-required-mark">*</span>
                   </label>
+                  <p className="hr-q-subtitle">
+                    จุดไหนที่รู้สึกว่ายังติดขัด ไม่สะดวก สภาพแวดล้อม หรือสิ่งที่อยากให้ซ่อมแซม/พัฒนาให้ดียิ่งขึ้น
+                  </p>
                 </div>
               </div>
 
@@ -397,6 +404,7 @@ export default function HrOfficeSurveyPage() {
                 ref={q2Ref}
                 value={q2}
                 onChange={(e) => handleFieldChange('q2', e.target.value, setQ2)}
+                placeholder="เช่น อุณหภูมิแอร์บางจุด, โต๊ะ-เก้าอี้ทำงาน, ความสะอาด, อุปกรณ์สำนักงาน, แสงสว่าง, ความเป็นส่วนตัว..."
                 className={`hr-textarea ${errors.q2 ? 'hr-textarea-error' : ''}`}
                 rows={3}
               />
@@ -418,6 +426,9 @@ export default function HrOfficeSurveyPage() {
                     <span>3. สิ่งที่อยากให้มีเพิ่มเข้ามา</span>
                     <span className="hr-required-mark">*</span>
                   </label>
+                  <p className="hr-q-subtitle">
+                    ไอเดียใหม่ๆ หรือสิ่งอำนวยความสะดวกที่อยากให้มี เพื่อเติมเต็มความสุขในการทำงาน
+                  </p>
                 </div>
               </div>
 
@@ -426,6 +437,7 @@ export default function HrOfficeSurveyPage() {
                 ref={q3Ref}
                 value={q3}
                 onChange={(e) => handleFieldChange('q3', e.target.value, setQ3)}
+                placeholder="เช่น มุมกาแฟ/เครื่องดื่มใหม่ๆ, โซนเงียบพักสายตา, ต้นไม้ฟอกอากาศ, บอร์ดเกม/ของเล่นคลายเครียด, อุปกรณ์ Ergonomics..."
                 className={`hr-textarea ${errors.q3 ? 'hr-textarea-error' : ''}`}
                 rows={3}
               />
@@ -447,6 +459,9 @@ export default function HrOfficeSurveyPage() {
                     <span>4. เรื่องที่อยากให้เปลี่ยนเป็นอันดับแรก (ถ้าทำได้แค่อย่างเดียว)</span>
                     <span className="hr-required-mark">*</span>
                   </label>
+                  <p className="hr-q-subtitle">
+                    หากเลือกได้เพียง 1 เรื่องที่คิดว่าจะสร้างการเปลี่ยนแปลงที่ดีที่สุดและเห็นผลเร็วที่สุด
+                  </p>
                 </div>
               </div>
 
@@ -455,6 +470,7 @@ export default function HrOfficeSurveyPage() {
                 ref={q4Ref}
                 value={q4}
                 onChange={(e) => handleFieldChange('q4', e.target.value, setQ4)}
+                placeholder="ถ้าเลือกเปลี่ยนได้เพียง 1 อย่างที่คิดว่าสำคัญที่สุดคือ..."
                 className={`hr-textarea ${errors.q4 ? 'hr-textarea-error' : ''}`}
                 rows={3}
               />
@@ -483,6 +499,7 @@ export default function HrOfficeSurveyPage() {
                 id="q5_input"
                 value={q5}
                 onChange={(e) => handleFieldChange('q5', e.target.value, setQ5)}
+                placeholder="ใส่ทุกความรู้สึกได้เลยค่ะ นึกอะไรออกก็ตอบกันได้เต็มที่..."
                 className="hr-textarea"
                 rows={3}
               />
