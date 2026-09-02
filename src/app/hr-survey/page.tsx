@@ -269,7 +269,7 @@ export default function HrOfficeSurveyPage() {
               ระบบปิดรับการแชร์ไอเดียสำหรับวันนี้แล้วค่ะ
             </h2>
             <p className="hr-success-message" style={{ marginBottom: '16px' }}>
-              ขอขอบคุณพี่น้อง HR ทุกคนที่ร่วมส่งต่อพลังใจและความคิดเห็นดีๆ ให้กับออฟฟิศ McThai
+              ขอขอบคุณพี่น้อง HR ทุกคนที่ร่วมแชร์ความคิดเห็นดีๆ ให้กับออฟฟิศ McThai
               ของพวกเราทุกคนนะคะ 💛 ❤️
             </p>
             <div
@@ -299,7 +299,6 @@ export default function HrOfficeSurveyPage() {
 
             <p className="hr-success-message">
               ขอบคุณทุกคน ที่ร่วมแบ่งปันมุมมอง เพื่อช่วยกันสร้างพื้นที่ทำงานที่น่าอยู่
-              และเป็นพลังใจให้กันในทุกๆ วัน
               <br />
               <span style={{ fontSize: '14px', color: '#64748B', display: 'block', marginTop: '10px' }}>
                 ทุกข้อเสนอแนะของทุกคนมีคุณค่า และจะถูกนำไปร่วมพิจารณาพัฒนาพื้นที่ออฟฟิศ McThai
@@ -437,9 +436,8 @@ export default function HrOfficeSurveyPage() {
               )}
             </div>
 
-            {/* Question 4: เรื่องที่อยากให้เปลี่ยนเป็นอันดับแรก (Highlighted) */}
-            <div className={`hr-q-card hr-q-card-priority ${errors.q4 ? 'hr-card-error' : ''}`}>
-              <span className="hr-priority-tag">★ สำคัญที่สุด</span>
+            {/* Question 4: เรื่องที่อยากให้เปลี่ยนเป็นอันดับแรก */}
+            <div className={`hr-q-card ${errors.q4 ? 'hr-card-error' : ''}`}>
               <div className="hr-q-header">
                 <div className="hr-q-icon hr-q-icon-purple">
                   <Target size={20} />
@@ -458,12 +456,6 @@ export default function HrOfficeSurveyPage() {
                 value={q4}
                 onChange={(e) => handleFieldChange('q4', e.target.value, setQ4)}
                 className={`hr-textarea ${errors.q4 ? 'hr-textarea-error' : ''}`}
-                style={{
-                  background: '#FFFFFF',
-                  borderColor: '#F59E0B',
-                  minHeight: '105px',
-                  fontWeight: 500,
-                }}
                 rows={3}
               />
               {errors.q4 && (

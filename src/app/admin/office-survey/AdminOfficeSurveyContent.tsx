@@ -170,7 +170,7 @@ export default function AdminOfficeSurveyContent({
       '1. สิ่งที่ชอบและอยากให้คงไว้': item.q1_liked,
       '2. สิ่งที่อยากให้ปรับปรุงหรือแก้ไข': item.q2_improve,
       '3. สิ่งที่อยากให้มีเพิ่มเข้ามา': item.q3_additions,
-      '4. เรื่องที่อยากให้เปลี่ยนเป็นอันดับแรก (สำคัญที่สุด)': item.q4_priority,
+      '4. เรื่องที่อยากให้เปลี่ยนเป็นอันดับแรก': item.q4_priority,
       '5. ข้อเสนอแนะอื่นๆ': item.q5_suggestions || '-',
       'IP Address': item.ipAddress || '-',
     }));
@@ -728,17 +728,6 @@ export default function AdminOfficeSurveyContent({
               >
                 <Target size={16} style={{ color: '#D97706' }} />
                 <span>4. เรื่องที่อยากเปลี่ยนเป็นอันดับแรก</span>
-                <span
-                  style={{
-                    background: '#F59E0B',
-                    color: '#FFFFFF',
-                    borderRadius: '9999px',
-                    padding: '1px 7px',
-                    fontSize: '11px',
-                  }}
-                >
-                  ★
-                </span>
               </button>
 
               <button
@@ -1113,18 +1102,6 @@ export default function AdminOfficeSurveyContent({
                     >
                       <Target size={15} style={{ color: '#D97706' }} />
                       <span>4. เรื่องที่อยากเปลี่ยนเป็นอันดับแรก:</span>
-                      <span
-                        style={{
-                          background: '#DA291C',
-                          color: '#FFFFFF',
-                          fontSize: '11px',
-                          padding: '1px 6px',
-                          borderRadius: '4px',
-                          fontWeight: 700,
-                        }}
-                      >
-                        สำคัญที่สุด
-                      </span>
                     </div>
                     <div
                       style={{
@@ -1214,11 +1191,9 @@ export default function AdminOfficeSurveyContent({
                         padding: '14px 16px',
                         textAlign: 'left',
                         minWidth: '240px',
-                        background: '#FEF3C7',
-                        color: '#92400E',
                       }}
                     >
-                      4. เปลี่ยนเป็นอันดับแรก ★
+                      4. เรื่องที่อยากให้เปลี่ยนเป็นอันดับแรก
                     </th>
                     <th style={{ padding: '14px 16px', textAlign: 'left', minWidth: '180px' }}>
                       5. ข้อเสนอแนะอื่นๆ
